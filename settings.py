@@ -67,8 +67,16 @@ class HomeRangeSettings:
         std_eccentricity: The standard deviation of the eccentricity of the home range.
     """
 
-    size: MinMaxRandomValue = MinMaxRandomValue(0.8, 8.0, DistributionType.NORMAL, {"avg": 2, "stddev": 0.5})
-    birth_period_size: MinMaxRandomValue = MinMaxRandomValue(0.2, 2.0, DistributionType.NORMAL, {"avg": 0.8, "stddev": 0.2})
+    @staticmethod
+    def default_size():
+        return MinMaxRandomValue(0.8, 8.0, DistributionType.NORMAL, {"avg": 2, "stddev": 0.5})
+
+    @staticmethod
+    def default_birth_period_size():
+        return MinMaxRandomValue(0.2, 2.0, DistributionType.NORMAL, {"avg": 0.8, "stddev": 0.2})
+
+    size: MinMaxRandomValue = field(default_factory=default_size)
+    birth_period_size: MinMaxRandomValue = field(default_factory=default_birth_period_size)
 
     avg_eccentricity: float = 0.5
     std_eccentricity: float = 0.1
@@ -86,9 +94,21 @@ class ReproductionSettings:
         birth_rate_period: Days of the year in which the birth is more likely to occur.
     """
 
-    cubs_per_litter: MinMaxRandomValue = MinMaxRandomValue(3, 17, DistributionType.EXPONENTIAL, {"lambda": 0.2})
-    length_of_gestation: MinMaxRandomValue = MinMaxRandomValue(50, 52, DistributionType.UNIFORM, {})
-    sexual_maturity_age: MinMaxRandomValue = MinMaxRandomValue(9, 10, DistributionType.UNIFORM, {})
+    @staticmethod
+    def default_cubs_per_litter():
+        return MinMaxRandomValue(3, 17, DistributionType.EXPONENTIAL, {"lambda": 0.2})
+
+    @staticmethod
+    def default_length_of_gestation():
+        return MinMaxRandomValue(50, 52, DistributionType.UNIFORM, {})
+
+    @staticmethod
+    def default_sexual_maturity_age():
+        return MinMaxRandomValue(9, 10, DistributionType.UNIFORM, {})
+
+    cubs_per_litter: MinMaxRandomValue = field(default_factory=default_cubs_per_litter)
+    length_of_gestation: MinMaxRandomValue = field(default_factory=default_length_of_gestation)
+    sexual_maturity_age: MinMaxRandomValue = field(default_factory=default_sexual_maturity_age)
     birth_rate_period: tuple[int, int] = (0, 31 + 28)
 
 
@@ -101,7 +121,10 @@ class MortalitySettings:
         mortality_rate: The mortality rate of the foxes (chance of dying in a specific year).
     """
 
-    mortality_rate: MinMaxRandomValue = MinMaxRandomValue(0.05, 0.32, DistributionType.UNIFORM, {})
+    @staticmethod
+    def default_mortality_rate():
+        return MinMaxRandomValue(0.05, 0.32, DistributionType.UNIFORM, {})
+    mortality_rate: MinMaxRandomValue = field(default_factory=default_mortality_rate)
 
 
 @dataclass
@@ -136,9 +159,21 @@ class ShootingSettings:
         shooting_excursions: Number of excursions per year on simulation terrain.
     """
 
-    culling_rate: MinMaxRandomValue = MinMaxRandomValue(1, 30, DistributionType.NORMAL, {"avg": 10, "stddev": 5})
-    shooting_rate: MinMaxRandomValue = MinMaxRandomValue(0, 2, DistributionType.NORMAL, {"avg": 0.5, "stddev": 0.2})
-    shooting_excursions: MinMaxRandomValue = MinMaxRandomValue(10, 80, DistributionType.NORMAL, {"avg": 30, "stddev": 10})
+    @staticmethod
+    def default_culling_rate():
+        return MinMaxRandomValue(1, 30, DistributionType.NORMAL, {"avg": 10, "stddev": 5})
+
+    @staticmethod
+    def default_shooting_rate():
+        return MinMaxRandomValue(0, 2, DistributionType.NORMAL, {"avg": 0.5, "stddev": 0.2})
+
+    @staticmethod
+    def default_shooting_excursions():
+        return MinMaxRandomValue(10, 80, DistributionType.NORMAL, {"avg": 30, "stddev": 10})
+
+    culling_rate: MinMaxRandomValue = field(default_factory=default_culling_rate)
+    shooting_rate: MinMaxRandomValue = field(default_factory=default_shooting_rate)
+    shooting_excursions: MinMaxRandomValue = field(default_factory=default_shooting_excursions)
     shooting_start: int = 6 * 30
     shooting_end: int = 3 * 30
 
@@ -152,7 +187,11 @@ class SocialSettings:
         social_group_size: The size of the social group of the foxes.
     """
 
-    social_group_size: MinMaxRandomValue = MinMaxRandomValue(2, 5, DistributionType.NORMAL, {"avg": 3, "stddev": 1})
+    @staticmethod
+    def default_social_group_size():
+        return MinMaxRandomValue(2, 5, DistributionType.NORMAL, {"avg": 3, "stddev": 1})
+
+    social_group_size: MinMaxRandomValue = field(default_factory=default_social_group_size)
 
 
 @dataclass

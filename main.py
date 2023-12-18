@@ -5,6 +5,8 @@ import pygame as pg
 import numpy as np
 import os
 
+# For quick testing on different savefiles
+SAVE_NAME = "grid.npy"
 
 class FieldType(Enum):
     GRASS = 0
@@ -32,8 +34,8 @@ class PygameSimulationTest:
         self.sim_settings.generic.grid_size = (30, 50)
         self.pg_settings = PygameSettings()
 
-        if os.path.exists("grid.npy"):
-            loaded_grid = np.load("grid.npy", allow_pickle=True)
+        if os.path.exists(SAVE_NAME):
+            loaded_grid = np.load(SAVE_NAME, allow_pickle=True)
             if loaded_grid.shape == self.sim_settings.generic.grid_size:
                 print("Loaded grid from file")
                 self.grid = loaded_grid
@@ -84,8 +86,11 @@ class PygameSimulationTest:
                     self.selected_tile_type = FieldType.URBAN
                     print("Selected urban")
                 elif event.key == pg.K_s:
-                    np.save("grid.npy", self.grid)
+                    np.save(SAVE_NAME, self.grid)
                     print("Saved grid to file")
+                elif event.key == pg.K_l:
+                    self.grid = np.load(SAVE_NAME, allow_pickle=True)
+                    print("Loaded grid from file")
             elif event.type == pg.MOUSEBUTTONDOWN:
                 if self.draw_mode:
                     self.draw_tile()
