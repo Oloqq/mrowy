@@ -23,14 +23,14 @@ class Fox:
         self.current_position = Vector2(den_position)
         self.home_range = self.generate_home_range()
         # basic configuration to get random value
-        self.low_activity_distribution_settings = MinMaxRandomValue(min=-1.5 * self.settings.movement.normal_speed,
-                                                                    max=1.5 * self.settings.movement.normal_speed,
-                                                                    distribution_type=DistributionType.NORMAL,
+        self.low_activity_distribution_settings = MinMaxRandomValue(min=-self.settings.movement.normal_speed,
+                                                                    max=self.settings.movement.normal_speed,
+                                                                    distribution_type=DistributionType.UNIFORM,
                                                                     distribution_params={"avg": 0, "stddev": 1})
-        self.high_activity_distribution_settings = MinMaxRandomValue(min=-1.5 * self.settings.movement.normal_speed,
-                                                                      max=1.5 * self.settings.movement.normal_speed,
-                                                                      distribution_type=DistributionType.NORMAL,
-                                                                      distribution_params={"avg": 0, "stddev": 0.3})
+        self.high_activity_distribution_settings = MinMaxRandomValue(min=-self.settings.movement.normal_speed,
+                                                                     max=self.settings.movement.normal_speed,
+                                                                     distribution_type=DistributionType.UNIFORM,
+                                                                     distribution_params={"avg": 0, "stddev": 0.3})
 
     def generate_home_range(self):
         home_range_settings = self.settings.home_range
@@ -66,7 +66,7 @@ class Fox:
         # który przeważnie występuje w godzinach 03:00 - 06:00 i 20:00 - 23:00.
         # W przypadku nor króliczych, lisy najczęściej obserwuje się w okolicach tych miejsc między godzinami 19:00 a 22:00.
 
-        if 6 < hour < 18:  #most active
+        if 6 < hour < 18:  # most active
             distribution_settings = self.high_activity_distribution_settings
         else:
             distribution_settings = self.low_activity_distribution_settings
@@ -76,11 +76,8 @@ class Fox:
         new_x = int(self.current_position.x + random_value_x)
         new_y = int(self.current_position.y + random_value_y)
 
-        # if new position is out of home range - fox moves to closest position in home range - temporary solution
-        if (new_x, new_y) not in self.home_range:
+        # if new position is too far from den - fox moves to closest position in home range - temporary solution
+        if (new_x - self.den_position.x) ** 2 + (new_y - self.den_position.y) ** 2 > 5 ** 2:
             new_x, new_y = min(self.home_range, key=lambda pos: (pos[0] - new_x) ** 2 + (pos[1] - new_y) ** 2)
 
         self.current_position = Vector2(new_x, new_y)
-
-
-
