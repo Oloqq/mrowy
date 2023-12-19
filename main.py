@@ -1,83 +1,69 @@
-from settings import get_default_settings
-from dataclasses import dataclass
-from enum import Enum
+from settings.simulation_settings import get_default_simulation_settings, SimulationSettings
+from settings.pg_settings import get_default_pygame_settings, PygameSettings
+from constants.enums import FieldType, ObjectType, DayPart
+from framework.time_manager import TimeManager
 import pygame as pg
 import numpy as np
 import os
 
 
-
-class FieldType(Enum):
-    GRASS = 0
-    FOREST = 1
-    WATER = 2
-    URBAN = 3
-
-class ObjectType(Enum):
-    NOTHING = 0
-    HUNTER = 1
-    FOX_DEN = 2
-    RABBIT_DEN = 3
-
-@dataclass
-class PygameSettings:
-    TILE_SIZE = 20
-    field_colors = {
-        FieldType.GRASS: (0, 255, 0),
-        FieldType.FOREST: (0, 100, 0),
-        FieldType.WATER: (0, 0, 255),
-        FieldType.URBAN: (100, 100, 100)
-    }
-    object_images = {
-        ObjectType.HUNTER: pg.image.load('assets/hunter.png'),
-        ObjectType.FOX_DEN: pg.image.load('assets/fox_den.png'),
-        ObjectType.RABBIT_DEN: pg.image.load('assets/rabbit_den.png')
-    }
-    # For quick testing on different savefiles
-    SAVE_NAME = "grid.npz"
-
-    GRID_WIDTH = 30
-    GRID_HEIGHT = 50
-
-
 class PygameSimulationTest:
-    FPS = 30
+    FPS: int = 5
+    sim_settings: SimulationSettings
+    pg_settings: PygameSettings
+    grid: np.ndarray = None
+    objects: np.ndarray = None
+    selected_tile_type: FieldType | ObjectType
+    draw_mode: bool
 
     def __init__(self):
-        self.sim_settings = get_default_settings()
-        self.pg_settings = PygameSettings()
-        self.sim_settings.generic.grid_size = (PygameSettings.GRID_WIDTH, PygameSettings.GRID_HEIGHT)
+        self.sim_settings = get_default_simulation_settings()
+        self.pg_settings = get_default_pygame_settings()
+        self.sim_settings.generic.grid_size = (self.pg_settings.GRID_WIDTH, self.pg_settings.GRID_HEIGHT)
 
-        # GRID AND OBJECTS INITIALIZATION
-        if os.path.exists(PygameSettings.SAVE_NAME):
-            loaded_data = np.load(PygameSettings.SAVE_NAME, allow_pickle=True)
-            loaded_grid = loaded_data['grid']
-            loaded_objects = loaded_data['objects']
-            if loaded_grid.shape == self.sim_settings.generic.grid_size and loaded_objects.shape == self.sim_settings.generic.grid_size:
-                print("Loaded grid from file")
-                self.grid = loaded_grid
-                self.objects = loaded_objects
-            elif loaded_grid.shape != self.sim_settings.generic.grid_size:
-                raise ValueError(f"Grid size in file does not match simulation settings\nGrid size in file: {loaded_grid.shape}\nExpected grid size: {self.sim_settings.generic.grid_size}")
-            else:
-                raise ValueError(f"Object grid size in file does not match simulation settings\nGrid size in file: {loaded_objects.shape}\nExpected grid size: {self.sim_settings.generic.grid_size}")
-
-        else:
-            print("Created new grid")
-            self.grid = np.full(self.sim_settings.generic.grid_size, FieldType.GRASS, dtype=FieldType)
-            self.objects = np.full(self.sim_settings.generic.grid_size, ObjectType.NOTHING, dtype=ObjectType)
+        self.initialize_grid()
 
         self.selected_tile_type = FieldType.FOREST
         self.draw_mode = True
 
         pg.init()
         self.screen = self.create_window()
+        self.night_screen = pg.Surface((self.pg_settings.TILE_SIZE * self.sim_settings.generic.grid_size[0],
+                            self.pg_settings.TILE_SIZE * self.sim_settings.generic.grid_size[1]))
+        self.night_screen.set_alpha(128)
+        self.night_screen.fill((0, 0, 0))
         self.clock = pg.time.Clock()
         self.done = False
 
+        self.time_manager = TimeManager(self.sim_settings.generic.time_step)
+
+    def initialize_grid(self):
+        if os.path.exists(self.pg_settings.SAVE_NAME):
+            loaded_data = np.load(self.pg_settings.SAVE_NAME, allow_pickle=True)
+            loaded_grid = loaded_data['grid']
+            loaded_objects = loaded_data['objects']
+            if (loaded_grid.shape == self.sim_settings.generic.grid_size and
+                    loaded_objects.shape == self.sim_settings.generic.grid_size):
+                print("Loaded grid from file")
+                self.grid = loaded_grid
+                self.objects = loaded_objects
+            elif loaded_grid.shape != self.sim_settings.generic.grid_size:
+                raise ValueError(f"Grid size in file does not match simulation settings\n"
+                                 f"Grid size in file: {loaded_grid.shape}\n"
+                                 f"Expected grid size: {self.sim_settings.generic.grid_size}")
+            else:
+                raise ValueError(f"Object grid size in file does not match simulation settings\n"
+                                 f"Grid size in file: {loaded_objects.shape}\n"
+                                 f"Expected grid size: {self.sim_settings.generic.grid_size}")
+
+        else:
+            print("Created new grid")
+            self.grid = np.full(self.sim_settings.generic.grid_size, FieldType.GRASS, dtype=FieldType)
+            self.objects = np.full(self.sim_settings.generic.grid_size, ObjectType.NOTHING, dtype=ObjectType)
+
     def create_window(self):
-        window_size = (PygameSettings.TILE_SIZE * self.sim_settings.generic.grid_size[0],
-                       PygameSettings.TILE_SIZE * self.sim_settings.generic.grid_size[1])
+        window_size = (self.pg_settings.TILE_SIZE * self.sim_settings.generic.grid_size[0],
+                       self.pg_settings.TILE_SIZE * self.sim_settings.generic.grid_size[1])
         return pg.display.set_mode(window_size)
 
     def run(self):
@@ -86,6 +72,10 @@ class PygameSimulationTest:
             self.handle_events()
             self.screen.fill((255, 255, 255))
             self.draw_grid()
+
+            time_of_day = self.time_manager.perform_time_step()
+            self.draw_time_of_day(time_of_day)
+
             pg.display.flip()
 
     def handle_events(self):
@@ -122,7 +112,7 @@ class PygameSimulationTest:
                     self.selected_tile_type = ObjectType.NOTHING
                     print("Selected object eraser")
                 elif event.key == pg.K_s:
-                    np.savez(PygameSettings.SAVE_NAME, grid=self.grid, objects=self.objects)
+                    np.savez(self.pg_settings.SAVE_NAME, grid=self.grid, objects=self.objects)
                     print("Saved grid to file")
             elif event.type == pg.MOUSEBUTTONDOWN:
                 if self.draw_mode:
@@ -132,8 +122,8 @@ class PygameSimulationTest:
 
     def draw_tile(self):
         mouse_pos = pg.mouse.get_pos()
-        x = mouse_pos[0] // PygameSettings.TILE_SIZE
-        y = mouse_pos[1] // PygameSettings.TILE_SIZE
+        x = mouse_pos[0] // self.pg_settings.TILE_SIZE
+        y = mouse_pos[1] // self.pg_settings.TILE_SIZE
 
         if isinstance(self.selected_tile_type, FieldType):
             self.grid[x, y] = self.selected_tile_type
@@ -143,24 +133,24 @@ class PygameSimulationTest:
     def draw_grid(self):
         for x in range(self.sim_settings.generic.grid_size[0]):
             for y in range(self.sim_settings.generic.grid_size[1]):
-                pg.draw.rect(self.screen, PygameSettings.field_colors[self.grid[x, y]],
-                             pg.Rect(x * PygameSettings.TILE_SIZE, y * PygameSettings.TILE_SIZE,
-                                     PygameSettings.TILE_SIZE, PygameSettings.TILE_SIZE), 0)
+                pg.draw.rect(self.screen, self.pg_settings.field_colors[self.grid[x, y]],
+                             pg.Rect(x * self.pg_settings.TILE_SIZE, y * self.pg_settings.TILE_SIZE,
+                                     self.pg_settings.TILE_SIZE, self.pg_settings.TILE_SIZE), 0)
                 if self.objects[x, y] is not ObjectType.NOTHING:
-                    object = pg.transform.scale(PygameSettings.object_images[self.objects[x,y]], (PygameSettings.TILE_SIZE, PygameSettings.TILE_SIZE))
-                    self.screen.blit(object, (x * PygameSettings.TILE_SIZE, y * PygameSettings.TILE_SIZE))
+                    obj = pg.transform.scale(self.pg_settings.object_images[self.objects[x, y]],
+                                             (self.pg_settings.TILE_SIZE, self.pg_settings.TILE_SIZE))
+                    self.screen.blit(obj, (x * self.pg_settings.TILE_SIZE, y * self.pg_settings.TILE_SIZE))
 
         for x in range(self.sim_settings.generic.grid_size[0] // 5):
             for y in range(self.sim_settings.generic.grid_size[1] // 5):
                 pg.draw.rect(self.screen, (0, 0, 0, 0),
-                             pg.Rect(x * PygameSettings.TILE_SIZE * 5, y * PygameSettings.TILE_SIZE * 5,
-                                     PygameSettings.TILE_SIZE * 5, PygameSettings.TILE_SIZE * 5), 1)
-                
-        # draw the fox for test purposes
-        #TODO: REMOVE
-        fox = pg.image.load('assets/fox.png')
-        fox = pg.transform.scale(fox, (PygameSettings.TILE_SIZE, PygameSettings.TILE_SIZE))
-        self.screen.blit(fox, (100, 100))
+                             pg.Rect(x * self.pg_settings.TILE_SIZE * 5, y * self.pg_settings.TILE_SIZE * 5,
+                                     self.pg_settings.TILE_SIZE * 5, self.pg_settings.TILE_SIZE * 5), 1)
+
+    def draw_time_of_day(self, time_of_day: DayPart):
+        print(self.time_manager.date, time_of_day)
+        if time_of_day == DayPart.NIGHT:
+            self.screen.blit(self.night_screen, (0, 0))
 
 
 sim = PygameSimulationTest()
