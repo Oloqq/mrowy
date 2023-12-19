@@ -94,6 +94,7 @@ class MortalitySettings:
         return MinMaxRandomValue(0.05, 0.32, DistributionType.UNIFORM, {})
 
     mortality_rate: MinMaxRandomValue = field(default_factory=default_mortality_rate)
+    hunger_increase_per_hour: float = 0.02
 
 
 @dataclass
