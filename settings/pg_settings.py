@@ -17,6 +17,7 @@ class PygameSettings:
         ObjectType.FOX_DEN: pg.image.load('assets/fox_den.png'),
         ObjectType.RABBIT_DEN: pg.image.load('assets/rabbit_den.png')
     }
+    FOX_IMAGE = pg.image.load("assets/fox.png") #did not see it anywhere else so I added it here
     SAVE_NAME = "grid.npz"
     GRID_WIDTH = 30
     GRID_HEIGHT = 50

@@ -2,8 +2,9 @@ import random
 
 from pygame import Vector2
 
+from framework.min_max_random_value import MinMaxRandomValue
 from settings.simulation_settings import FoxSimulationSettings
-from constants.enums import Sex
+from constants.enums import Sex, DistributionType
 
 
 class Fox:
@@ -11,6 +12,7 @@ class Fox:
     sex: Sex
     den_position: Vector2
     current_position: Vector2
+    normal_distribution_settings: MinMaxRandomValue
 
     def __init__(self, fox_settings: FoxSimulationSettings, sex: Sex, den_position: tuple[int, int]):
         self.settings = fox_settings
@@ -19,6 +21,10 @@ class Fox:
         self.den_position = Vector2(den_position)
         self.current_position = Vector2(den_position)
         self.home_range = self.generate_home_range()
+        # basic configuration to get random value
+        self.normal_distribution_settings = MinMaxRandomValue(min=-1.5*self.settings.movement.normal_speed, max=1.5*self.settings.movement.normal_speed,
+                                                              distribution_type=DistributionType.NORMAL,
+                                                              distribution_params={"avg": 0, "stddev": 1})
 
     def generate_home_range(self):
         home_range_settings = self.settings.home_range
@@ -46,3 +52,16 @@ class Fox:
 
         return home_range
 
+    def move(self):
+        # foxes move in random direction, with random value from normal distribution,
+        # taking into account their normal speed
+        random_value_x = self.normal_distribution_settings.get_random_value()
+        random_value_y = self.normal_distribution_settings.get_random_value()
+        new_x = int(self.current_position.x + random_value_x)
+        new_y = int(self.current_position.y + random_value_y)
+
+        # if new position is out of home range - fox doesnt move - temporary solution
+        if (new_x, new_y) not in self.home_range:
+            pass
+        else:
+            self.current_position = Vector2(new_x, new_y)
