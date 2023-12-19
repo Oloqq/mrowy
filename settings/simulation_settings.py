@@ -1,10 +1,7 @@
-from dataclasses import dataclass, field
-import sys
-
-sys.path.append('..')
-
-from constants.enums import DistributionType, TimeStep, Sex
 from framework.min_max_random_value import MinMaxRandomValue
+from constants.enums import DistributionType, TimeStep, Sex
+from dataclasses import dataclass, field
+
 
 @dataclass
 class GenericSimulationSettings:

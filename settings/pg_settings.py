@@ -1,10 +1,6 @@
+from constants.enums import FieldType, ObjectType
 from dataclasses import dataclass
 import pygame as pg
-import sys
-
-sys.path.append('..')
-
-from constants.enums import FieldType, ObjectType
 
 
 @dataclass

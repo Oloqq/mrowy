@@ -1,10 +1,6 @@
+from constants.enums import DistributionType
 from dataclasses import dataclass
 import random
-import sys
-
-sys.path.append('..')
-
-from constants.enums import DistributionType
 
 
 @dataclass

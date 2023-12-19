@@ -1,6 +1,7 @@
 from settings.simulation_settings import get_default_simulation_settings, SimulationSettings
 from settings.pg_settings import get_default_pygame_settings, PygameSettings
 from constants.enums import FieldType, ObjectType, DayPart
+from framework.population_manager import PopulationManager
 from framework.time_manager import TimeManager
 import pygame as pg
 import numpy as np
@@ -36,6 +37,12 @@ class PygameSimulationTest:
         self.done = False
 
         self.time_manager = TimeManager(self.sim_settings.generic.time_step)
+        self.population_manager = PopulationManager(self.sim_settings)
+        self.initialize_simulation()
+
+    def initialize_simulation(self):
+        fox_dens = np.where(self.objects == ObjectType.FOX_DEN)
+        self.population_manager.create_population(list(zip(*fox_dens)))
 
     def initialize_grid(self):
         if os.path.exists(self.pg_settings.SAVE_NAME):
@@ -73,8 +80,8 @@ class PygameSimulationTest:
             self.screen.fill((255, 255, 255))
             self.draw_grid()
 
-            time_of_day = self.time_manager.perform_time_step()
-            self.draw_time_of_day(time_of_day)
+            # time_of_day = self.time_manager.perform_time_step()
+            # self.draw_time_of_day(time_of_day)
 
             pg.display.flip()
 

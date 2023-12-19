@@ -1,13 +1,9 @@
+from settings.time_manager_settings import get_default_time_manager_settings, TimeManagerSettings
+from constants.enums import DayPart, TimeStep
 from astral import Astral
 from typing import Any
 import numpy as np
 import datetime
-import sys
-
-sys.path.append('..')
-
-from settings.time_manager_settings import get_default_time_manager_settings, TimeManagerSettings
-from constants.enums import DayPart, TimeStep
 
 
 class DayCycle:
