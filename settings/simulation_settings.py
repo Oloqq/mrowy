@@ -29,23 +29,25 @@ class HomeRangeSettings:
     Attributes:
         size: The size of the home range.
         birth_period_size: Smaller range size after birth of new foxes.
-        avg_eccentricity: The average eccentricity of the home range (it is elliptical).
-        std_eccentricity: The standard deviation of the eccentricity of the home range.
+        radius_ratio: The average eccentricity of the home range (it is elliptical).
+        std_radius_ratio: The standard deviation of the eccentricity of the home range.
     """
 
     @staticmethod
     def default_size():
-        return MinMaxRandomValue(0.8, 8.0, DistributionType.NORMAL, {"avg": 2, "stddev": 0.5})
+        return MinMaxRandomValue(0.8, 8.0, DistributionType.NORMAL, {"avg": 3, "stddev": 0.5})
 
     @staticmethod
     def default_birth_period_size():
         return MinMaxRandomValue(0.2, 2.0, DistributionType.NORMAL, {"avg": 0.8, "stddev": 0.2})
 
+    @staticmethod
+    def default_radius_ratio():
+        return MinMaxRandomValue(0.5, 1.0, DistributionType.UNIFORM, {})
+
     size: MinMaxRandomValue = field(default_factory=default_size)
     birth_period_size: MinMaxRandomValue = field(default_factory=default_birth_period_size)
-
-    avg_eccentricity: float = 0.5
-    std_eccentricity: float = 0.1
+    radius_ratio: MinMaxRandomValue = field(default_factory=default_radius_ratio)
 
 
 @dataclass

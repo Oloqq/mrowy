@@ -38,11 +38,22 @@ class PygameSimulationTest:
 
         self.time_manager = TimeManager(self.sim_settings.generic.time_step)
         self.population_manager = PopulationManager(self.sim_settings)
+
+        self.home_ranges = np.array([])
+        self.draw_home_ranges = True
+
         self.initialize_simulation()
 
     def initialize_simulation(self):
         fox_dens = np.where(self.objects == ObjectType.FOX_DEN)
         self.population_manager.create_population(list(zip(*fox_dens)))
+        self.home_ranges = np.full(self.sim_settings.generic.grid_size, 0, dtype=object)
+
+        for fox in self.population_manager.get_foxes():
+            for pos in fox.home_range:
+                if 0 <= pos[0] < self.sim_settings.generic.grid_size[0] and \
+                        0 <= pos[1] < self.sim_settings.generic.grid_size[1]:
+                    self.home_ranges[pos] = 1
 
     def initialize_grid(self):
         if os.path.exists(self.pg_settings.SAVE_NAME):
@@ -143,6 +154,10 @@ class PygameSimulationTest:
                 pg.draw.rect(self.screen, self.pg_settings.field_colors[self.grid[x, y]],
                              pg.Rect(x * self.pg_settings.TILE_SIZE, y * self.pg_settings.TILE_SIZE,
                                      self.pg_settings.TILE_SIZE, self.pg_settings.TILE_SIZE), 0)
+                if self.home_ranges[x, y] == 1 and self.draw_home_ranges:
+                    pg.draw.rect(self.screen, (0, 255, 255),
+                                 pg.Rect(x * self.pg_settings.TILE_SIZE, y * self.pg_settings.TILE_SIZE,
+                                         self.pg_settings.TILE_SIZE, self.pg_settings.TILE_SIZE), 0)
                 if self.objects[x, y] is not ObjectType.NOTHING:
                     obj = pg.transform.scale(self.pg_settings.object_images[self.objects[x, y]],
                                              (self.pg_settings.TILE_SIZE, self.pg_settings.TILE_SIZE))

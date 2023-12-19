@@ -45,8 +45,6 @@ class PopulationManager:
     def create_population(self, den_positions: list[tuple[int, int]]):
         for i, den_position in enumerate(den_positions):
             self.groups.append(FoxGroup(i, den_position, self.simulation_settings.fox))
-        for group in self.groups:
-            print(group)
 
     def get_foxes(self):
         foxes = []
