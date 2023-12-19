@@ -94,12 +94,9 @@ class PygameSimulationTest:
             time_of_day = self.time_manager.perform_time_step()
             self.draw_time_of_day(time_of_day)
 
-            #movement of foxes - it is the only change here
-            if(time_of_day == DayPart.NIGHT):
-                pass
-            else:
-                foxes = self.population_manager.get_foxes()
-                self.move_foxes(foxes)
+            # movement of foxes - it is the only change here
+            foxes = self.population_manager.get_foxes()
+            self.move_foxes(foxes, self.time_manager.date.hour)
 
             pg.display.flip()
 
@@ -189,9 +186,9 @@ class PygameSimulationTest:
         if time_of_day == DayPart.NIGHT:
             self.screen.blit(self.night_screen, (0, 0))
 
-    def move_foxes(self, foxes):
+    def move_foxes(self, foxes, hour):
         for fox in foxes:
-            fox.move()
+            fox.move(hour)
 
 
 sim = PygameSimulationTest()
