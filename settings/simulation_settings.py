@@ -4,24 +4,7 @@ import sys
 sys.path.append('..')
 
 from constants.enums import DistributionType, TimeStep, Sex
-
-
-@dataclass
-class MinMaxRandomValue:
-    """
-    Type of randomly generated value with a min and max.
-
-    Attributes:
-        min: The minimum value.
-        max: The maximum value.
-        distribution_type: The distribution type.
-        distribution_params: The distribution parameters.
-    """
-    min: float
-    max: float
-    distribution_type: DistributionType
-    distribution_params: dict[str, float]
-
+from framework.min_max_random_value import MinMaxRandomValue
 
 @dataclass
 class GenericSimulationSettings:
