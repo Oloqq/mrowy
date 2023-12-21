@@ -42,6 +42,8 @@ class PygameSimulationTest:
         self.home_ranges = np.array([])
         self.draw_home_ranges = True
 
+        self.step_by_step = False # if true, the simulation will only advance one step at a time (press enter to advance)
+
         self.initialize_simulation()
 
     def initialize_simulation(self):
@@ -97,8 +99,12 @@ class PygameSimulationTest:
             # movement of foxes - it is the only change here
             foxes = self.population_manager.get_foxes()
             self.move_foxes(foxes, self.time_manager.date.hour, self.objects)
-
+            
             pg.display.flip()
+
+            if self.step_by_step:
+                self.wait_for_space()
+
 
     def handle_events(self):
         for event in pg.event.get():
@@ -136,6 +142,8 @@ class PygameSimulationTest:
                 elif event.key == pg.K_s:
                     np.savez(self.pg_settings.SAVE_NAME, grid=self.grid, objects=self.objects)
                     print("Saved grid to file")
+                elif event.key == pg.K_p:
+                    self.step_by_step = not self.step_by_step
             elif event.type == pg.MOUSEBUTTONDOWN:
                 if self.draw_mode:
                     self.draw_tile()
@@ -189,6 +197,21 @@ class PygameSimulationTest:
     def move_foxes(self, foxes, hour, objects):
         for fox in foxes:
             fox.move(hour, objects)
+
+    def wait_for_space(self):
+        stop_flag = 1
+        while stop_flag > 0 and not self.done:
+            for event in pg.event.get():
+                if event.type == pg.KEYDOWN:
+                    if event.key == pg.K_RETURN:
+                        stop_flag = 0
+                    elif event.key == pg.K_p:
+                        self.step_by_step = not self.step_by_step
+                        stop_flag = 0
+                    elif event.key == pg.K_ESCAPE:
+                        self.done = True
+                elif event.type == pg.QUIT:
+                    self.done = True
 
 
 sim = PygameSimulationTest()
