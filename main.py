@@ -42,7 +42,7 @@ class PygameSimulationTest:
         self.home_ranges = np.array([])
         self.draw_home_ranges = True
 
-        self.step_by_step = False # if true, the simulation will only advance one step at a time (press enter to advance)
+        self.step_by_step = False  # if true, the simulation will only advance one step at a time (press enter to advance)
 
         self.initialize_simulation()
 
@@ -99,12 +99,11 @@ class PygameSimulationTest:
             # movement of foxes - it is the only change here
             foxes = self.population_manager.get_foxes()
             self.move_foxes(foxes, self.time_manager.date.hour, self.objects)
-            
+
             pg.display.flip()
 
             if self.step_by_step:
                 self.wait_for_space()
-
 
     def handle_events(self):
         for event in pg.event.get():
@@ -190,13 +189,13 @@ class PygameSimulationTest:
                              (fox_pos[0] * self.pg_settings.TILE_SIZE, fox_pos[1] * self.pg_settings.TILE_SIZE))
 
     def draw_time_of_day(self, time_of_day: DayPart):
-        #print(self.time_manager.date, time_of_day)
+        # print(self.time_manager.date, time_of_day)
         if time_of_day == DayPart.NIGHT:
             self.screen.blit(self.night_screen, (0, 0))
 
     def move_foxes(self, foxes, hour, objects):
         for fox in foxes:
-            fox.move(hour, objects)
+            fox.move(self.population_manager, hour, objects)
 
     def wait_for_space(self):
         stop_flag = 1

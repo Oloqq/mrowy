@@ -52,4 +52,11 @@ class PopulationManager:
             foxes.extend(group.foxes)
         return foxes
 
-
+    def remove_fox(self, fox: Fox):
+        for group in self.groups:
+            if fox in group.foxes:
+                group.foxes.remove(fox)
+                group.size -= 1
+                if group.size == 0:
+                    self.groups.remove(group)
+                break

@@ -8,7 +8,7 @@ from constants.enums import Sex, DistributionType, ObjectType
 
 
 class Fox:
-    age: int
+    age: int  # days?
     sex: Sex
     den_position: Vector2
     current_position: Vector2
@@ -39,6 +39,7 @@ class Fox:
                                                             max=0.2,
                                                             distribution_type=DistributionType.NORMAL,
                                                             distribution_params={"avg": 0.1, "stddev": 1})
+        self.mortality_rate = self.settings.mortality.default_mortality_rate().get_random_value()
 
     def generate_home_range(self):
         home_range_settings = self.settings.home_range
@@ -86,7 +87,7 @@ class Fox:
     def search_for_food(self):
         self.feed(self.food_distribution_settings.get_random_value())
 
-    def move(self, hour, objects):
+    def move(self, population_manager, hour, objects):
         # Aktywność przy padlinie jest skoncentrowana głównie w godzinach 0:00 -
         # 3:00 i 18:00 - 22:00, podobnie jak czas spędzany przy punktach wodnych, który przeważnie występuje w
         # godzinach 03:00 - 06:00 i 20:00 - 23:00. W przypadku nor króliczych, lisy najczęściej obserwuje się w
@@ -112,4 +113,12 @@ class Fox:
             new_x, new_y = min(self.home_range, key=lambda pos: (pos[0] - new_x) ** 2 + (pos[1] - new_y) ** 2)
 
         self.current_position = Vector2(new_x, new_y)
+
+        if hour == 0:
+            self.age += 1   #przy założeniu że wiek liczymy w dniach - do ustalenia
         self.increase_hunger()
+        self.check_death(population_manager)
+
+    def check_death(self, population_manager):
+        if self.hunger > 1:
+            population_manager.remove_fox(self)
