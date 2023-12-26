@@ -102,8 +102,8 @@ class PygameSimulationTest:
             foxes = self.population_manager.get_foxes()
             self.move_foxes(foxes, self.time_manager.date, self.objects)
 
-            if self.time_manager.date.hour == 1:
-                print(self.time_manager.date)
+            # if self.time_manager.date.hour == 1:
+            #     print(self.time_manager.date)
 
             pg.display.flip()
 

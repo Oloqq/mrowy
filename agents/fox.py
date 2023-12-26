@@ -17,10 +17,11 @@ class Fox:
     hunger: float
     hunger_increase_per_hour: float
 
-    def __init__(self, fox_settings: FoxSimulationSettings, sex: Sex, den_position: tuple[int, int]):
-        self.population_manager = None
+    def __init__(self, fox_settings: FoxSimulationSettings, sex: Sex, den_position: tuple[int, int],
+                 population_manager):
+        self.population_manager = population_manager
         self.settings = fox_settings
-        self.age = 11 #initial population age
+        self.age = 11  # initial population age
         self.sex = sex
         self.hunger = 0
         self.hunger_increase_per_hour = fox_settings.mortality.hunger_increase_per_hour
@@ -98,7 +99,6 @@ class Fox:
         # 3:00 i 18:00 - 22:00, podobnie jak czas spędzany przy punktach wodnych, który przeważnie występuje w
         # godzinach 03:00 - 06:00 i 20:00 - 23:00. W przypadku nor króliczych, lisy najczęściej obserwuje się w
         # okolicach tych miejsc między godzinami 19:00 a 22:00.
-        self.population_manager = population_manager
 
         if 19 < date.hour < 22:
             self.hunt_rabbits(objects)
@@ -110,25 +110,16 @@ class Fox:
         else:
             distribution_settings = self.low_activity_distribution_settings
 
-        random_value_x = distribution_settings.get_random_value()
-        random_value_y = distribution_settings.get_random_value()
-        new_x = int(self.current_position.x + random_value_x)
-        new_y = int(self.current_position.y + random_value_y)
-
-        # if new position is too far from den - fox moves to the closest position in home range - temporary solution
-        if (new_x - self.den_position.x) ** 2 + (new_y - self.den_position.y) ** 2 > 5 ** 2:
-            new_x, new_y = min(self.home_range, key=lambda pos: (pos[0] - new_x) ** 2 + (pos[1] - new_y) ** 2)
-
-        self.current_position = Vector2(new_x, new_y)
+        self.change_position(distribution_settings)
+        self.increase_hunger()
+        self.check_death()
 
         if date.month == 1 and date.day == 1 and date.hour == 1:
             self.age += 1
             self.was_pregnant_this_year = False
 
-        self.increase_hunger()
-        self.check_death()
-
-        if self.sex == Sex.FEMALE and (date.month == 1 or date.month == 2) and self.age >= self.maturity_age and self.was_pregnant_this_year is False and self.is_pregnant is False:
+        if self.sex == Sex.FEMALE and (date.month == 1 or date.month == 2) and self.age >= self.maturity_age \
+                and self.was_pregnant_this_year is False and self.is_pregnant is False:
             self.search_for_mate()
 
         if date.hour == 0 and self.is_pregnant is True:
@@ -137,7 +128,17 @@ class Fox:
             else:
                 self.birth()
 
-    def check_death(self): #commented for reproduction testing reasons
+    def change_position(self, distribution_settings):
+        random_value_x = distribution_settings.get_random_value()
+        random_value_y = distribution_settings.get_random_value()
+        new_x = int(self.current_position.x + random_value_x)
+        new_y = int(self.current_position.y + random_value_y)
+        # if new position is too far from den - fox moves to the closest position in home range - temporary solution
+        if (new_x - self.den_position.x) ** 2 + (new_y - self.den_position.y) ** 2 > 5 ** 2:
+            new_x, new_y = min(self.home_range, key=lambda pos: (pos[0] - new_x) ** 2 + (pos[1] - new_y) ** 2)
+        self.current_position = Vector2(new_x, new_y)
+
+    def check_death(self):  # commented for reproduction testing reasons
         # if self.hunger > 1:
         #     self.population_manager.remove_fox(self)
         pass

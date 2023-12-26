@@ -15,15 +15,17 @@ def get_default_population_settings() -> PopulationSettings:
 
 
 class FoxGroup:
-    def __init__(self, group_id: int, den_position: tuple[int, int], fox_settings: FoxSimulationSettings):
+    def __init__(self, group_id: int, den_position: tuple[int, int], fox_settings: FoxSimulationSettings,
+                 population_manager):
         self.group_id = group_id
         self.size = int(fox_settings.social.social_group_size.get_random_value())
-        dominant_male = Fox(fox_settings, Sex.MALE, den_position)
-        dominant_female = Fox(fox_settings, Sex.FEMALE, den_position)
+        dominant_male = Fox(fox_settings, Sex.MALE, den_position, population_manager)
+        dominant_female = Fox(fox_settings, Sex.FEMALE, den_position, population_manager)
         self.foxes = [dominant_male, dominant_female]
 
         for i in range(self.size - 2):
-            self.foxes.append(Fox(fox_settings, Sex.MALE if random.random() > 0.5 else Sex.FEMALE, den_position))
+            self.foxes.append(
+                Fox(fox_settings, Sex.MALE if random.random() > 0.5 else Sex.FEMALE, den_position, population_manager))
 
     def __repr__(self):
         str_repr = f"------- Group {self.group_id} -------\n"
@@ -43,7 +45,7 @@ class PopulationManager:
 
     def create_population(self, den_positions: list[tuple[int, int]]):
         for i, den_position in enumerate(den_positions):
-            self.groups.append(FoxGroup(i, den_position, self.simulation_settings.fox))
+            self.groups.append(FoxGroup(i, den_position, self.simulation_settings.fox, population_manager=self))
 
     def get_foxes(self):
         foxes = []
@@ -65,7 +67,7 @@ class PopulationManager:
             if fox in group.foxes:
                 for i in range(int(number_of_cubs)):
                     child = Fox(self.simulation_settings.fox,
-                        Sex.MALE if random.random() > 0.5 else Sex.FEMALE, fox.den_position)
+                                Sex.MALE if random.random() > 0.5 else Sex.FEMALE, fox.den_position, self)
                     child.age = 0
                     group.foxes.append(child)
                 break
