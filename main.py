@@ -1,3 +1,5 @@
+import datetime
+
 from settings.simulation_settings import get_default_simulation_settings, SimulationSettings
 from settings.pg_settings import get_default_pygame_settings, PygameSettings
 from constants.enums import FieldType, ObjectType, DayPart
@@ -98,7 +100,10 @@ class PygameSimulationTest:
 
             # movement of foxes - it is the only change here
             foxes = self.population_manager.get_foxes()
-            self.move_foxes(foxes, self.time_manager.date.hour, self.objects)
+            self.move_foxes(foxes, self.time_manager.date, self.objects)
+
+            if self.time_manager.date.hour == 1:
+                print(self.time_manager.date)
 
             pg.display.flip()
 
@@ -193,9 +198,9 @@ class PygameSimulationTest:
         if time_of_day == DayPart.NIGHT:
             self.screen.blit(self.night_screen, (0, 0))
 
-    def move_foxes(self, foxes, hour, objects):
+    def move_foxes(self, foxes, date, objects):
         for fox in foxes:
-            fox.move(self.population_manager, hour, objects)
+            fox.move(self.population_manager, date, objects)
 
     def wait_for_space(self):
         stop_flag = 1

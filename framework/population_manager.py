@@ -7,7 +7,6 @@ import random
 
 @dataclass
 class PopulationSettings:
-
     INITIAL_POPULATION_SIZE: int = 100
 
 
@@ -59,4 +58,14 @@ class PopulationManager:
                 group.size -= 1
                 if group.size == 0:
                     self.groups.remove(group)
+                break
+
+    def add_foxes(self, fox: Fox, number_of_cubs):
+        for group in self.groups:
+            if fox in group.foxes:
+                for i in range(int(number_of_cubs)):
+                    child = Fox(self.simulation_settings.fox,
+                        Sex.MALE if random.random() > 0.5 else Sex.FEMALE, fox.den_position)
+                    child.age = 0
+                    group.foxes.append(child)
                 break
