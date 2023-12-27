@@ -8,7 +8,7 @@ from constants.enums import Sex, DistributionType, ObjectType
 
 
 class Fox:
-    age: int  # days?
+    age: int
     sex: Sex
     den_position: Vector2
     current_position: Vector2
@@ -21,7 +21,7 @@ class Fox:
                  population_manager):
         self.population_manager = population_manager
         self.settings = fox_settings
-        self.age = 11  # initial population age
+        self.age = 11  # for testing reproduction - we can randomize it for initial population not to start with 0
         self.sex = sex
         self.hunger = 0
         self.hunger_increase_per_hour = fox_settings.mortality.hunger_increase_per_hour
@@ -41,12 +41,13 @@ class Fox:
                                                                      distribution_type=DistributionType.UNIFORM,
                                                                      distribution_params={"avg": 0, "stddev": 0.3})
         self.food_distribution_settings = MinMaxRandomValue(min=0,
-                                                            max=0.2,
+                                                            max=0.4,
                                                             distribution_type=DistributionType.NORMAL,
-                                                            distribution_params={"avg": 0.1, "stddev": 1})
+                                                            distribution_params={"avg": 0.2, "stddev": 1})
         self.mortality_rate = self.settings.mortality.default_mortality_rate().get_random_value()
         self.maturity_age = self.settings.reproduction.default_sexual_maturity_age().get_random_value()
         self.birth_period = self.settings.reproduction.birth_rate_period
+        self.day_of_death = self.set_death_date()
 
     def generate_home_range(self):
         home_range_settings = self.settings.home_range
@@ -74,6 +75,58 @@ class Fox:
 
         return home_range
 
+    def set_death_date(self):
+        if random.random() < self.mortality_rate + (self.age / 100):
+            date = random.randint(1, 365)
+            hour = random.randint(0, 23)
+            return date, hour
+        else:
+            return None
+
+    def move(self, population_manager, date, objects):
+        # Aktywność przy padlinie jest skoncentrowana głównie w godzinach 0:00 -
+        # 3:00 i 18:00 - 22:00, podobnie jak czas spędzany przy punktach wodnych, który przeważnie występuje w
+        # godzinach 03:00 - 06:00 i 20:00 - 23:00. W przypadku nor króliczych, lisy najczęściej obserwuje się w
+        # okolicach tych miejsc między godzinami 19:00 a 22:00.
+        if 19 < date.hour < 22:
+            self.hunt_rabbits(objects)
+        if 0 < date.hour < 3 or 18 < date.hour < 22:
+            self.search_for_food()
+
+        self.change_position(date.hour)
+        self.increase_hunger()
+        self.check_death(date)
+
+        if date.month == 1 and date.day == 1 and date.hour == 1:
+            self.age += 1
+            self.was_pregnant_this_year = False
+            self.mortality_rate = self.settings.mortality.mortality_rate.get_random_value()
+
+        if self.sex == Sex.FEMALE and (date.month == 1 or date.month == 2) and self.age >= self.maturity_age \
+                and self.was_pregnant_this_year is False and self.is_pregnant is False:
+            self.search_for_mate()
+
+        if date.hour == 0 and self.is_pregnant is True:
+            if self.days_till_birth > 0:
+                self.days_till_birth -= 1
+            else:
+                self.birth()
+
+    def change_position(self, hour):
+        if 6 > hour or hour > 18:  # most active
+            distribution_settings = self.high_activity_distribution_settings
+        else:
+            distribution_settings = self.low_activity_distribution_settings
+
+        random_value_x = distribution_settings.get_random_value()
+        random_value_y = distribution_settings.get_random_value()
+        new_x = int(self.current_position.x + random_value_x)
+        new_y = int(self.current_position.y + random_value_y)
+        # if new position is too far from den - fox moves to the closest position in home range - temporary solution
+        if (new_x - self.den_position.x) ** 2 + (new_y - self.den_position.y) ** 2 > 5 ** 2:
+            new_x, new_y = min(self.home_range, key=lambda pos: (pos[0] - new_x) ** 2 + (pos[1] - new_y) ** 2)
+        self.current_position = Vector2(new_x, new_y)
+
     def feed(self, value):
         if self.hunger < value:
             self.hunger = 0
@@ -94,54 +147,14 @@ class Fox:
     def search_for_food(self):
         self.feed(self.food_distribution_settings.get_random_value())
 
-    def move(self, population_manager, date, objects):
-        # Aktywność przy padlinie jest skoncentrowana głównie w godzinach 0:00 -
-        # 3:00 i 18:00 - 22:00, podobnie jak czas spędzany przy punktach wodnych, który przeważnie występuje w
-        # godzinach 03:00 - 06:00 i 20:00 - 23:00. W przypadku nor króliczych, lisy najczęściej obserwuje się w
-        # okolicach tych miejsc między godzinami 19:00 a 22:00.
-
-        if 19 < date.hour < 22:
-            self.hunt_rabbits(objects)
-        if 0 < date.hour < 3 or 18 < date.hour < 22:
-            self.search_for_food()
-
-        if 6 > date.hour or date.hour > 18:  # most active
-            distribution_settings = self.high_activity_distribution_settings
-        else:
-            distribution_settings = self.low_activity_distribution_settings
-
-        self.change_position(distribution_settings)
-        self.increase_hunger()
-        self.check_death()
-
-        if date.month == 1 and date.day == 1 and date.hour == 1:
-            self.age += 1
-            self.was_pregnant_this_year = False
-
-        if self.sex == Sex.FEMALE and (date.month == 1 or date.month == 2) and self.age >= self.maturity_age \
-                and self.was_pregnant_this_year is False and self.is_pregnant is False:
-            self.search_for_mate()
-
-        if date.hour == 0 and self.is_pregnant is True:
-            if self.days_till_birth > 0:
-                self.days_till_birth -= 1
-            else:
-                self.birth()
-
-    def change_position(self, distribution_settings):
-        random_value_x = distribution_settings.get_random_value()
-        random_value_y = distribution_settings.get_random_value()
-        new_x = int(self.current_position.x + random_value_x)
-        new_y = int(self.current_position.y + random_value_y)
-        # if new position is too far from den - fox moves to the closest position in home range - temporary solution
-        if (new_x - self.den_position.x) ** 2 + (new_y - self.den_position.y) ** 2 > 5 ** 2:
-            new_x, new_y = min(self.home_range, key=lambda pos: (pos[0] - new_x) ** 2 + (pos[1] - new_y) ** 2)
-        self.current_position = Vector2(new_x, new_y)
-
-    def check_death(self):  # commented for reproduction testing reasons
-        # if self.hunger > 1:
-        #     self.population_manager.remove_fox(self)
-        pass
+    def check_death(self, date):
+        if self.hunger > 1:
+            self.population_manager.remove_fox(self)
+            print("fox died of hunger")
+        if self.day_of_death is not None and date.timetuple().tm_yday == self.day_of_death[0] and date.hour == \
+                self.day_of_death[1]:
+            self.population_manager.remove_fox(self)
+            print("fox died of natural reasons")
 
     def search_for_mate(self):
         # if there is a den and a male in 3x3 square, they mate

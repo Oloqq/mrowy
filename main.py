@@ -98,7 +98,6 @@ class PygameSimulationTest:
             time_of_day = self.time_manager.perform_time_step()
             self.draw_time_of_day(time_of_day)
 
-            # movement of foxes - it is the only change here
             foxes = self.population_manager.get_foxes()
             self.move_foxes(foxes, self.time_manager.date, self.objects)
 
