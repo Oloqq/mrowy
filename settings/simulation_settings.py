@@ -177,6 +177,20 @@ class MovementSettings:
     normal_speed: int = 7
     max_speed: int = 45
 
+    @staticmethod
+    def default_low_activity_speed():
+        return MinMaxRandomValue(min=-7,
+                                 max=7,
+                                 distribution_type=DistributionType.UNIFORM,
+                                 distribution_params={"avg": 0, "stddev": 0.3})
+
+    @staticmethod
+    def defautl_high_activity_speed():
+        return MinMaxRandomValue(min=-7,
+                                 max=7,
+                                 distribution_type=DistributionType.UNIFORM,
+                                 distribution_params={"avg": 0, "stddev": 1})
+
 
 @dataclass
 class FoxSimulationSettings:

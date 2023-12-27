@@ -44,6 +44,9 @@ class PygameSimulationTest:
         self.home_ranges = np.array([])
         self.draw_home_ranges = True
 
+        self.food_matrix = np.array([])
+        self.initialize_food_matrix()
+
         self.step_by_step = False  # if true, the simulation will only advance one step at a time (press enter to advance)
 
         self.initialize_simulation()
@@ -99,7 +102,8 @@ class PygameSimulationTest:
             self.draw_time_of_day(time_of_day)
 
             foxes = self.population_manager.get_foxes()
-            self.move_foxes(foxes, self.time_manager.date, self.objects)
+            self.calculate_food_matrix(foxes)
+            self.move_foxes(foxes, self.time_manager.date, self.objects, self.food_matrix)
 
             # if self.time_manager.date.hour == 1:
             #     print(self.time_manager.date)
@@ -197,9 +201,9 @@ class PygameSimulationTest:
         if time_of_day == DayPart.NIGHT:
             self.screen.blit(self.night_screen, (0, 0))
 
-    def move_foxes(self, foxes, date, objects):
+    def move_foxes(self, foxes, date, objects, food_matrix):
         for fox in foxes:
-            fox.move(self.population_manager, date, objects)
+            fox.move(self.population_manager, date, objects, food_matrix)
 
     def wait_for_space(self):
         stop_flag = 1
@@ -215,6 +219,23 @@ class PygameSimulationTest:
                         self.done = True
                 elif event.type == pg.QUIT:
                     self.done = True
+
+    def initialize_food_matrix(self):
+        self.food_matrix = np.random.rand(self.sim_settings.generic.grid_size[0],
+                                          self.sim_settings.generic.grid_size[1])
+
+    def calculate_food_matrix(self, foxes):
+        for x in range(self.sim_settings.generic.grid_size[0]):
+            for y in range(self.sim_settings.generic.grid_size[1]):
+                neighborhood_x = slice(max(0, x - 1), min(self.sim_settings.generic.grid_size[0], x + 2))
+                neighborhood_y = slice(max(0, y - 1), min(self.sim_settings.generic.grid_size[1], y + 2))
+
+                fox_count = sum(
+                    1 for fox in foxes if
+                    neighborhood_x.start <= fox.current_position.x < neighborhood_x.stop and
+                    neighborhood_y.start <= fox.current_position.y < neighborhood_y.stop
+                )
+                self.food_matrix[x, y] = np.random.rand() * 0.4 / max(1, fox_count)  # adjustable
 
 
 sim = PygameSimulationTest()

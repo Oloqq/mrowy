@@ -31,19 +31,8 @@ class Fox:
         self.is_pregnant = False
         self.was_pregnant_this_year = False
         self.days_till_birth = 0
-        # basic configuration to get random value
-        self.low_activity_distribution_settings = MinMaxRandomValue(min=-self.settings.movement.normal_speed,
-                                                                    max=self.settings.movement.normal_speed,
-                                                                    distribution_type=DistributionType.UNIFORM,
-                                                                    distribution_params={"avg": 0, "stddev": 1})
-        self.high_activity_distribution_settings = MinMaxRandomValue(min=-self.settings.movement.normal_speed,
-                                                                     max=self.settings.movement.normal_speed,
-                                                                     distribution_type=DistributionType.UNIFORM,
-                                                                     distribution_params={"avg": 0, "stddev": 0.3})
-        self.food_distribution_settings = MinMaxRandomValue(min=0,
-                                                            max=0.4,
-                                                            distribution_type=DistributionType.NORMAL,
-                                                            distribution_params={"avg": 0.2, "stddev": 1})
+        self.low_activity_distribution_settings = self.settings.movement.default_low_activity_speed()
+        self.high_activity_distribution_settings = self.settings.movement.defautl_high_activity_speed()
         self.mortality_rate = self.settings.mortality.default_mortality_rate().get_random_value()
         self.maturity_age = self.settings.reproduction.default_sexual_maturity_age().get_random_value()
         self.birth_period = self.settings.reproduction.birth_rate_period
@@ -83,7 +72,7 @@ class Fox:
         else:
             return None
 
-    def move(self, population_manager, date, objects):
+    def move(self, population_manager, date, objects, food_matrix):
         # Aktywność przy padlinie jest skoncentrowana głównie w godzinach 0:00 -
         # 3:00 i 18:00 - 22:00, podobnie jak czas spędzany przy punktach wodnych, który przeważnie występuje w
         # godzinach 03:00 - 06:00 i 20:00 - 23:00. W przypadku nor króliczych, lisy najczęściej obserwuje się w
@@ -91,7 +80,7 @@ class Fox:
         if 19 < date.hour < 22:
             self.hunt_rabbits(objects)
         if 0 < date.hour < 3 or 18 < date.hour < 22:
-            self.search_for_food()
+            self.search_for_food(food_matrix)
 
         self.change_position(date.hour)
         self.increase_hunger()
@@ -144,8 +133,10 @@ class Fox:
                     self.feed(1)
                     return
 
-    def search_for_food(self):
-        self.feed(self.food_distribution_settings.get_random_value())
+    def search_for_food(self, food_matrix):
+        self.feed(food_matrix[
+                      min(int(self.current_position.x), food_matrix.shape[0] - 1), min(int(self.current_position.y),
+                                                                                       food_matrix.shape[1] - 1)])
 
     def check_death(self, date):
         if self.hunger > 1:
