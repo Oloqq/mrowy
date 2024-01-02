@@ -36,3 +36,5 @@ class ObjectType(Enum):
 class DayPart(Enum):
     NIGHT = 0
     DAY = 1
+    DAWN = 2
+    DUSK = 3

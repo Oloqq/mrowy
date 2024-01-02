@@ -179,17 +179,17 @@ class MovementSettings:
 
     @staticmethod
     def default_low_activity_speed():
-        return MinMaxRandomValue(min=-7,
-                                 max=7,
-                                 distribution_type=DistributionType.UNIFORM,
-                                 distribution_params={"avg": 0, "stddev": 0.3})
+        return MinMaxRandomValue(min=-1,
+                                 max=1,
+                                 distribution_type=DistributionType.NORMAL,
+                                 distribution_params={'avg': 0, 'stddev': 0.5})
 
     @staticmethod
-    def defautl_high_activity_speed():
-        return MinMaxRandomValue(min=-7,
-                                 max=7,
-                                 distribution_type=DistributionType.UNIFORM,
-                                 distribution_params={"avg": 0, "stddev": 1})
+    def default_high_activity_speed():
+        return MinMaxRandomValue(min=-2,
+                                 max=2,
+                                 distribution_type=DistributionType.NORMAL,
+                                 distribution_params={'avg': 0, 'stddev': 1})
 
 
 @dataclass

@@ -1,9 +1,11 @@
+from pygame import Vector2
+
 from settings.simulation_settings import SimulationSettings, FoxSimulationSettings
 from dataclasses import dataclass
 from constants.enums import Sex
 from agents.fox import Fox
+import numpy as np
 import random
-
 
 @dataclass
 class PopulationSettings:
@@ -15,7 +17,7 @@ def get_default_population_settings() -> PopulationSettings:
 
 
 class FoxGroup:
-    def __init__(self, group_id: int, den_position: tuple[int, int], fox_settings: FoxSimulationSettings,
+    def __init__(self, group_id: int, den_position: Vector2, fox_settings: FoxSimulationSettings,
                  population_manager):
         self.group_id = group_id
         self.size = int(fox_settings.social.social_group_size.get_random_value())
@@ -38,7 +40,8 @@ class FoxGroup:
 
 class PopulationManager:
 
-    def __init__(self, simulation_settings: SimulationSettings):
+    def __init__(self, simulation_settings: SimulationSettings, grid: np.ndarray):
+        self.grid = grid
         self.groups = []
         self.simulation_settings = simulation_settings
         self.settings = get_default_population_settings()

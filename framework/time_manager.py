@@ -19,6 +19,8 @@ class DayCycle:
     def get_times_of_day(self):
         hours = np.full(24, DayPart.NIGHT, dtype=DayPart)
         hours[self.sunrise.hour:self.sunset.hour] = DayPart.DAY
+        hours[self.sunrise.hour - 1] = DayPart.DAWN
+        hours[self.sunset.hour] = DayPart.DUSK
 
         return hours
 
