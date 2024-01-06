@@ -18,16 +18,16 @@ def get_default_population_settings() -> PopulationSettings:
 
 class FoxGroup:
     def __init__(self, group_id: int, den_position: Vector2, fox_settings: FoxSimulationSettings,
-                 population_manager):
+                 population_manager, date):
         self.group_id = group_id
         self.size = int(fox_settings.social.social_group_size.get_random_value())
-        dominant_male = Fox(fox_settings, Sex.MALE, den_position, population_manager)
-        dominant_female = Fox(fox_settings, Sex.FEMALE, den_position, population_manager)
+        dominant_male = Fox(fox_settings, Sex.MALE, den_position, population_manager, date)
+        dominant_female = Fox(fox_settings, Sex.FEMALE, den_position, population_manager, date)
         self.foxes = [dominant_male, dominant_female]
 
         for i in range(self.size - 2):
             self.foxes.append(
-                Fox(fox_settings, Sex.MALE if random.random() > 0.5 else Sex.FEMALE, den_position, population_manager))
+                Fox(fox_settings, Sex.MALE if random.random() > 0.5 else Sex.FEMALE, den_position, population_manager, date))
 
     def __repr__(self):
         str_repr = f"------- Group {self.group_id} -------\n"
@@ -46,9 +46,9 @@ class PopulationManager:
         self.simulation_settings = simulation_settings
         self.settings = get_default_population_settings()
 
-    def create_population(self, den_positions: list[tuple[int, int]]):
+    def create_population(self, den_positions: list[tuple[int, int]], date):
         for i, den_position in enumerate(den_positions):
-            self.groups.append(FoxGroup(i, den_position, self.simulation_settings.fox, population_manager=self))
+            self.groups.append(FoxGroup(i, den_position, self.simulation_settings.fox, population_manager=self, date=date))
 
     def get_foxes(self):
         foxes = []
@@ -65,12 +65,12 @@ class PopulationManager:
                     self.groups.remove(group)
                 break
 
-    def add_foxes(self, fox: Fox, number_of_cubs):
+    def add_foxes(self, fox: Fox, number_of_cubs, date):
         for group in self.groups:
             if fox in group.foxes:
                 for i in range(int(number_of_cubs)):
                     child = Fox(self.simulation_settings.fox,
-                                Sex.MALE if random.random() > 0.5 else Sex.FEMALE, fox.den_position, self)
+                                Sex.MALE if random.random() > 0.5 else Sex.FEMALE, fox.den_position, self, date)
                     child.age = 0
                     group.foxes.append(child)
                 break

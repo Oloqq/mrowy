@@ -11,7 +11,7 @@ import os
 
 
 class PygameSimulationTest:
-    FPS: int = 5
+    FPS: int = 1000
     sim_settings: SimulationSettings
     pg_settings: PygameSettings
     grid: np.ndarray = None
@@ -59,7 +59,7 @@ class PygameSimulationTest:
 
     def initialize_simulation(self):
         fox_dens = np.where(self.objects == ObjectType.FOX_DEN)
-        self.population_manager.create_population(list(zip(*fox_dens)))
+        self.population_manager.create_population(list(zip(*fox_dens)), self.time_manager.date)
         self.home_ranges = np.full(self.sim_settings.generic.grid_size, 0, dtype=object)
 
         for fox in self.population_manager.get_foxes():
@@ -106,6 +106,7 @@ class PygameSimulationTest:
             self.handle_events()
             self.screen.fill((255, 255, 255))
             self.draw_grid()
+
 
             if not self.draw_mode:
                 time_of_day = self.time_manager.perform_time_step()

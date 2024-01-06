@@ -109,7 +109,11 @@ class DispersalSettings:
         dispersal_end: The end of the dispersal period (day of the year).
     """
 
-    dispersal_age: float = 0.5
+    @staticmethod
+    def default_dispersal_day():
+        return MinMaxRandomValue(0, 170, DistributionType.NORMAL, {"avg": 85, "stddev": 10})
+
+    dispersal_day: float = field(default_factory=default_dispersal_day)
     dispersal_distance: dict[Sex, MinMaxRandomValue] = field(default_factory=lambda: {
         Sex.MALE: MinMaxRandomValue(5, 122, DistributionType.NORMAL, {"avg": 29, "stddev": 10}),
         Sex.FEMALE: MinMaxRandomValue(2, 24, DistributionType.NORMAL, {"avg": 12, "stddev": 4}),
