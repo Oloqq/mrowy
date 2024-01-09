@@ -5,6 +5,7 @@ from settings.pg_settings import get_default_pygame_settings, PygameSettings
 from constants.enums import FieldType, ObjectType, DayPart
 from framework.population_manager import PopulationManager
 from framework.time_manager import TimeManager
+from agents.hunter import Hunter
 import pygame as pg
 import numpy as np
 import os
@@ -52,6 +53,8 @@ class PygameSimulationTest:
 
         self.food_matrix = np.array([])
         self.initialize_food_matrix()
+
+        self.hunter = Hunter(self.sim_settings.fox.shooting, self.population_manager, self.objects)
 
         self.step_by_step = False  # if true, the simulation will only advance one step at a time (press enter to advance)
 
@@ -101,6 +104,7 @@ class PygameSimulationTest:
         while not self.done:
             if self.draw_mode:
                 self.clock.tick(60)
+                
             else:
                 self.clock.tick(self.FPS)
             self.handle_events()
@@ -116,6 +120,8 @@ class PygameSimulationTest:
                 foxes = self.population_manager.get_foxes()
                 if self.time_manager.date.hour == 0:
                     self.calculate_food_matrix(foxes)
+                if self.time_manager.date.hour == 23:
+                    self.hunter.hunt(self.time_manager.date, foxes)
 
                 if self.debug:
                     print('------------------------------')
@@ -222,6 +228,11 @@ class PygameSimulationTest:
                                            (self.pg_settings.TILE_SIZE, self.pg_settings.TILE_SIZE))
             self.screen.blit(fox_image,
                              (fox_pos[0] * self.pg_settings.TILE_SIZE, fox_pos[1] * self.pg_settings.TILE_SIZE))
+        
+        hunter_image = pg.transform.scale(self.pg_settings.object_images[ObjectType.HUNTER],
+                                           (self.pg_settings.TILE_SIZE, self.pg_settings.TILE_SIZE))
+        self.screen.blit(hunter_image,
+                         (self.hunter.position[0] * self.pg_settings.TILE_SIZE, self.hunter.position[1] * self.pg_settings.TILE_SIZE))
 
     def draw_time_of_day(self, time_of_day: DayPart):
         # print(self.time_manager.date, time_of_day)
@@ -274,7 +285,7 @@ class PygameSimulationTest:
                     neighborhood_x.start <= fox.current_position.x < neighborhood_x.stop and
                     neighborhood_y.start <= fox.current_position.y < neighborhood_y.stop
                 )
-                self.food_matrix[x, y] += max(0, np.random.normal(0, 0.25) / max(1, fox_count))  # adjustable
+                self.food_matrix[x, y] += max(0, np.random.normal(0, 0.25))  # adjustable
 
 
 sim = PygameSimulationTest()
