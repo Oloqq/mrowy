@@ -20,19 +20,11 @@ class Hunter:
         self.settings = shooting_settings
         self.range = 3 # n in every direction, so (n+1)x(n+1) area
         self.available_positions = self.find_available_positions(objects)
-        self.position = random.choice(self.available_positions)
+        self.position = Vector2(random.choice(self.available_positions))
         self.culling_rate = shooting_settings.default_culling_rate().get_random_value()
-        self.shooting_rate = shooting_settings.default_shooting_rate().get_random_value()
+        self.shooting_rate = round(shooting_settings.default_shooting_rate().get_random_value())
         # this will be generated at the beggining of simulation, the very first time hunt() is called        
         self.shooting_days = []
-    
-# Zresp sobie huntera w jakimś miejscu
-# Poluje self.shooting_excursions razy w roku, zabijając self.shooting_rate lisów
-# self.culling_rate szansy na zabicie matki w norze?? 
-# Będzie skanował teren 7x7 wokół siebie i wymiatał lisy z tego terenu, jeśli nie ma to im się farci albo coś idk
-# Po zakończeniu polowania przerzuć się do losowej innej pozycji na mapie (ale najlepiej w stronę lisów)
-# Po zakończeniu polowania zaktualizuj self.culling_rate i self.shooting_rate
-# Po zakończeniu sezonu polowania zaktualizuj self.shooting_excursions
     
     # Find every good hunting position (has to be near fox dens and not in water)
     def find_available_positions(self, objects):
@@ -62,8 +54,7 @@ class Hunter:
         for i in range(self.settings.shooting_start, 366):
             legal_shooting_days.append(i)
 
-        # hunting_amount = int(self.settings.default_shooting_excursions().get_random_value())
-        hunting_amount = 60
+        hunting_amount = int(self.settings.default_shooting_excursions().get_random_value())
         shooting_days = random.sample(legal_shooting_days, hunting_amount)
         self.shooting_days = sorted(shooting_days)
         print(f"Hunting days:\n {self.shooting_days}")
@@ -76,16 +67,16 @@ class Hunter:
             return
         self.shooting_days.remove(date.timetuple().tm_yday)
 
-        # Check how many foxes killed
-        foxes_killed = round(self.settings.default_shooting_rate().get_random_value())
+        # Check how many foxes killed and update 
+        foxes_killed = self.shooting_rate
         if foxes_killed == 0:
+            self.shooting_rate = round(self.settings.default_shooting_rate().get_random_value())
             return
         
         # Check if mother killed
-        # Chance for this on average is 10%, shouldn't I just change this to flat 10 or something?
-        mother_cull = random.random() < self.settings.default_culling_rate().get_random_value()
+        mother_cull = random.random() < self.culling_rate
         
-        # Look for hot foxes in your area
+        # Look for foxes in the area
         nearby_foxes = []
 
         # Track pregnant foxes separately (they stay in dens)
@@ -127,8 +118,13 @@ class Hunter:
         # Move to a random position
         self.position = Vector2(random.choice(self.available_positions))
 
-        # print(f"foxes I tried to kill: {foxes_killed}")
-        # print(f"foxes I killed: {len(killed_foxes)}")
+        # Update values
+        self.shooting_rate = round(self.settings.default_shooting_rate().get_random_value())
+        self.culling_rate = self.settings.default_culling_rate().get_random_value()
+
+        # FOR DEBUG PURPOSES
+        # print(f"foxes (not mothers) I tried to kill: {foxes_killed}")
         # print(f"mothers I tried to kill: {1 if mother_cull else 0}")
+        # print(f"foxes killed: {len(killed_foxes)}")
         # print(f"mothers available: {len(mothers)}")
         # print(f"position: {self.position}")

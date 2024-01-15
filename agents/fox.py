@@ -24,10 +24,13 @@ class Fox:
                  population_manager, date):
         self.population_manager = population_manager
         self.settings = fox_settings
-        #TODO:
+
         # if foxes can only get pregnant during january/february, then we can't randomly have a fox with age 4 months
-        # during january, because that's impossible. so we need to randomize the age of initial population in some clever way I guess
-        self.age = 11  # age in months. set to 11 for testing reproduction - we can randomize it for initial population not to start with 0
+        # during january, because that's impossible. so we need to randomize the age of initial population
+
+        # (very patchwork solution)
+        self.ages = {8: 1, 9: 2, 10: 1, 20: 5, 21: 6, 22: 5}
+        self.age = random.choices(list(self.ages.keys()), list(self.ages.values()), k=1)[0]
         self.sex = sex
         self.hunger = 0
         self.hunger_increase_per_hour = fox_settings.mortality.hunger_increase_per_hour
@@ -45,9 +48,9 @@ class Fox:
         self.day_of_death = self.set_death_date(date)
         self.dispersal_distance = self.settings.dispersal.dispersal_distance[self.sex].get_random_value()
         self.dispersal_day = int((285 + self.settings.dispersal.default_dispersal_day().get_random_value())) % 365 + 1
-        #TODO:
         # if age higher than dispersal age, set to true
-        self.has_dispersed = False
+        # (another patchwork solution)
+        self.has_dispersed = False if self.age*30 < self.dispersal_day else True
 
     def generate_home_range(self):
         home_range_settings = self.settings.home_range
@@ -124,10 +127,10 @@ class Fox:
         self.check_death(date)
 
         # Age
-        if date.month == 1 and date.day == 1 and date.hour == 1:
+        if date.day == 1 and date.hour == 1:
             self.age += 1
-            self.was_pregnant_this_year = False
-            self.mortality_rate = self.settings.mortality.mortality_rate.get_random_value()
+            if date.month == 1:
+                self.was_pregnant_this_year = False
 
         # Reproduction
         #TODO: add some randomness, so that foxes don't reproduce at the same time

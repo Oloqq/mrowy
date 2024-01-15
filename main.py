@@ -2,9 +2,10 @@ import datetime
 
 from settings.simulation_settings import get_default_simulation_settings, SimulationSettings
 from settings.pg_settings import get_default_pygame_settings, PygameSettings
-from constants.enums import FieldType, ObjectType, DayPart
+from constants.enums import FieldType, ObjectType, DayPart, Sex
 from framework.population_manager import PopulationManager
 from framework.time_manager import TimeManager
+from framework.plot import plot
 from agents.hunter import Hunter
 import pygame as pg
 import numpy as np
@@ -19,7 +20,9 @@ class PygameSimulationTest:
     objects: np.ndarray = None
     selected_tile_type: FieldType | ObjectType
     draw_mode: bool
-    debug: bool = False
+    debug: bool = True
+    fox_stats: np.ndarray = None
+    mean_scores: np.ndarray = None
 
     def __init__(self):
         self.sim_settings = get_default_simulation_settings()
@@ -57,6 +60,9 @@ class PygameSimulationTest:
         self.hunter = Hunter(self.sim_settings.fox.shooting, self.population_manager, self.objects)
 
         self.step_by_step = False  # if true, the simulation will only advance one step at a time (press enter to advance)
+
+        self.fox_stats = np.empty(shape=[0])
+        self.mean_scores = np.empty(shape=[0])
 
         self.initialize_simulation()
 
@@ -124,12 +130,33 @@ class PygameSimulationTest:
                     self.hunter.hunt(self.time_manager.date, foxes)
 
                 if self.debug:
+                    male_foxes = 0
+                    for fox in foxes:
+                        if fox.sex == Sex.MALE:
+                            male_foxes += 1
                     print('------------------------------')
-                    print(f'Population size: {len(foxes)}')
+                    print(f'Population size: {len(foxes)}, Male foxes: {male_foxes}, Female foxes: {len(foxes)-male_foxes}')
                     print(f'Food on map: {np.sum(self.food_matrix)}')
                     print(f'Max hunger: {np.max([fox.hunger for fox in foxes])}')
                     print(f'Min hunger: {np.min([fox.hunger for fox in foxes])}')
                     print(f'Average hunger: {np.mean([fox.hunger for fox in foxes])}')
+
+ 
+                # print(len(self.fox_stats))
+                # if len(self.mean_scores) > 0:
+                    # mean = (np.cumsum(self.mean_scores) + len(foxes)) / len(self.fox_stats)
+                # else:
+                    # mean = len(foxes)
+                # self.mean_scores = np.append(self.mean_scores, [mean])
+
+                # print(self.fox_stats, self.mean_scores, mean)
+
+                if self.time_manager.date.hour == 1:
+                    self.fox_stats = np.append(self.fox_stats, [len(foxes)])
+                    self.mean_scores = np.append(self.mean_scores, [round(np.mean(self.fox_stats), 2)])
+                    if self.time_manager.date.day == 1:
+                        plot(self.fox_stats, self.mean_scores)
+
 
                 self.move_foxes(foxes, self.time_manager.date, self.objects, self.food_matrix)
 

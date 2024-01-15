@@ -2,3 +2,5 @@ python==3.11.*
 pygame==2.5.2
 numpy==1.23.5
 astral==1.2
+matplotlib==3.8.2
+ipython==8.20.0

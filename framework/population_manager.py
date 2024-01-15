@@ -70,7 +70,8 @@ class PopulationManager:
             if fox in group.foxes:
                 for i in range(int(number_of_cubs)):
                     child = Fox(self.simulation_settings.fox,
-                                Sex.MALE if random.random() > 0.5 else Sex.FEMALE, fox.den_position, self, date)
+                                random.choices([Sex.MALE, Sex.FEMALE], [46, 54], k=1)[0], fox.den_position, self, date)
                     child.age = 0
                     group.foxes.append(child)
+                    group.size += 1
                 break
