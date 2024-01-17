@@ -10,7 +10,7 @@ def plot(foxes, mean_foxes):
     display.display(plt.gcf())
     plt.clf()
     plt.title('Foxes data')
-    plt.xlabel('Day')
+    plt.xlabel('Week')
     plt.ylabel('Population')
     plt.plot(foxes, label='Current amount of foxes')
     plt.plot(mean_foxes, label='Mean amount of foxes')

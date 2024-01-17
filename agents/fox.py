@@ -108,7 +108,7 @@ class Fox:
                 year += 1
                 
 
-    def move(self, date, objects, food_matrix):
+    def move(self, date, objects, food_matrix, rabbits_in_dens):
         # Aktywność przy padlinie jest skoncentrowana głównie w godzinach 0:00 -
         # 3:00 i 18:00 - 22:00, podobnie jak czas spędzany przy punktach wodnych, który przeważnie występuje w
         # godzinach 03:00 - 06:00 i 20:00 - 23:00. W przypadku nor króliczych, lisy najczęściej obserwuje się w
@@ -118,7 +118,7 @@ class Fox:
         # 19:00 - 22:00 - poluj na króliki
         
         if 19 <= date.hour < 22:
-            self.hunt_rabbits(objects)
+            self.hunt_rabbits(objects, rabbits_in_dens)
         if 0 <= date.hour < 3 or 18 <= date.hour < 22:
             self.search_for_food(food_matrix)
 
@@ -190,17 +190,19 @@ class Fox:
     def increase_hunger(self):
         self.hunger += self.hunger_increase_per_hour
 
-    def hunt_rabbits(self, objects):
+    def hunt_rabbits(self, objects, rabbits_in_dens):
         grid_size = PygameSettings.GRID_WIDTH, PygameSettings.GRID_HEIGHT
         # function checks if there is a rabbit den in 5x5 surrounding of fox - if there is, fox feeds on it
         for x in range(int(max(0, self.current_position.x - 2)), int(min(grid_size[0], self.current_position.x + 3))):
             for y in range(int(max(0, self.current_position.y - 2)), int(min(grid_size[1], self.current_position.y + 3))):
-                if objects[x, y] is ObjectType.RABBIT_DEN:
+                if objects[x, y] is ObjectType.RABBIT_DEN and (x, y) in rabbits_in_dens.keys() and rabbits_in_dens[(x, y)] > 0:
                     chance = random.random()
-                    if chance < 0.6 and self.population_manager.grid[x, y] == FieldType.GRASS:
+                    if chance < 0.55 and self.population_manager.grid[x, y] == FieldType.GRASS:
                         self.feed(1)
-                    elif chance < 0.8 and self.population_manager.grid[x, y] == FieldType.FOREST:
+                        rabbits_in_dens[(x, y)] -= 1
+                    elif chance < 0.75 and self.population_manager.grid[x, y] == FieldType.FOREST:
                         self.feed(1)
+                        rabbits_in_dens[(x, y)] -= 1
                     return
 
     def search_for_food(self, food_matrix):

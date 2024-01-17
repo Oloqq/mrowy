@@ -29,6 +29,7 @@ class PygameSimulationTest:
         self.pg_settings = get_default_pygame_settings()
         self.sim_settings.generic.grid_size = (self.pg_settings.GRID_WIDTH, self.pg_settings.GRID_HEIGHT)
 
+        self.rabbits_in_dens = {}
         self.initialize_grid()
 
         self.selected_tile_type = FieldType.FOREST
@@ -95,11 +96,17 @@ class PygameSimulationTest:
                 raise ValueError(f"Object grid size in file does not match simulation settings\n"
                                  f"Grid size in file: {loaded_objects.shape}\n"
                                  f"Expected grid size: {self.sim_settings.generic.grid_size}")
-
         else:
             print("Created new grid")
             self.grid = np.full(self.sim_settings.generic.grid_size, FieldType.GRASS, dtype=FieldType)
             self.objects = np.full(self.sim_settings.generic.grid_size, ObjectType.NOTHING, dtype=ObjectType)
+
+        yy, xx = self.objects.shape
+        for y in range(yy):
+            for x in range(xx):
+                if self.objects[y, x] == ObjectType.RABBIT_DEN:
+                    self.rabbits_in_dens[(y, x)] = 15
+        
 
     def create_window(self):
         window_size = (self.pg_settings.TILE_SIZE * self.sim_settings.generic.grid_size[0],
@@ -141,24 +148,22 @@ class PygameSimulationTest:
                     print(f'Min hunger: {np.min([fox.hunger for fox in foxes])}')
                     print(f'Average hunger: {np.mean([fox.hunger for fox in foxes])}')
 
- 
-                # print(len(self.fox_stats))
-                # if len(self.mean_scores) > 0:
-                    # mean = (np.cumsum(self.mean_scores) + len(foxes)) / len(self.fox_stats)
-                # else:
-                    # mean = len(foxes)
-                # self.mean_scores = np.append(self.mean_scores, [mean])
-
-                # print(self.fox_stats, self.mean_scores, mean)
 
                 if self.time_manager.date.hour == 1:
-                    self.fox_stats = np.append(self.fox_stats, [len(foxes)])
-                    self.mean_scores = np.append(self.mean_scores, [round(np.mean(self.fox_stats), 2)])
-                    if self.time_manager.date.day == 1:
+                    for rabbit in self.rabbits_in_dens.keys():
+                        self.rabbits_in_dens[rabbit] = 15
+
+                    if self.time_manager.date.weekday() == 1:
+                        self.fox_stats = np.append(self.fox_stats, [len(foxes)])
+                        self.mean_scores = np.append(self.mean_scores, [round(np.mean(self.fox_stats), 2)])
+                    if self.time_manager.date.day == 1 and len(self.fox_stats) > 0:
                         plot(self.fox_stats, self.mean_scores)
 
+                if self.time_manager.date.year == 2030:
+                    self.done = True
 
-                self.move_foxes(foxes, self.time_manager.date, self.objects, self.food_matrix)
+                self.move_foxes(foxes, self.time_manager.date, self.objects, self.food_matrix, self.rabbits_in_dens)
+                # print(self.time_manager.date.hour, self.rabbits_in_dens)
 
                 if self.step_by_step:
                     self.wait_for_space()
@@ -277,9 +282,9 @@ class PygameSimulationTest:
                 self.screen.blit(self.night_screen, (0, 0))
                 self.night_screen.set_alpha(96)
 
-    def move_foxes(self, foxes, date, objects, food_matrix):
-        for fox in foxes:
-            fox.move(date, objects, food_matrix)
+    def move_foxes(self, foxes, date, objects, food_matrix, rabbits_in_dens):
+        for fox in reversed(foxes):
+            fox.move(date, objects, food_matrix, rabbits_in_dens)
 
     def wait_for_space(self):
         stop_flag = 1
@@ -312,7 +317,7 @@ class PygameSimulationTest:
                     neighborhood_x.start <= fox.current_position.x < neighborhood_x.stop and
                     neighborhood_y.start <= fox.current_position.y < neighborhood_y.stop
                 )
-                self.food_matrix[x, y] += max(0, np.random.normal(0, 0.25))  # adjustable
+                self.food_matrix[x, y] += max(0, np.random.normal(0, 0.05))  # adjustable
 
 
 sim = PygameSimulationTest()

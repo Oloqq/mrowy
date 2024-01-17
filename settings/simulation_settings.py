@@ -145,6 +145,7 @@ class ShootingSettings:
     def default_shooting_excursions():
         return MinMaxRandomValue(10, 80, DistributionType.NORMAL, {"avg": 30, "stddev": 10})
 
+
     culling_rate: MinMaxRandomValue = field(default_factory=default_culling_rate)
     shooting_rate: MinMaxRandomValue = field(default_factory=default_shooting_rate)
     shooting_excursions: MinMaxRandomValue = field(default_factory=default_shooting_excursions)
