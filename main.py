@@ -1,5 +1,3 @@
-import datetime
-
 from settings.simulation_settings import get_default_simulation_settings, SimulationSettings
 from settings.pg_settings import get_default_pygame_settings, PygameSettings
 from constants.enums import FieldType, ObjectType, DayPart, Sex
@@ -7,33 +5,33 @@ from framework.population_manager import PopulationManager
 from framework.time_manager import TimeManager
 from framework.plot import plot
 from agents.hunter import Hunter
+
 import pygame as pg
 import numpy as np
 import os
+from typing import Callable, Self
 
+MAX_FPS = 10
 
-class PygameSimulationTest:
-    FPS: int = 1000
-    sim_settings: SimulationSettings
-    pg_settings: PygameSettings
-    grid: np.ndarray = None
-    objects: np.ndarray = None
-    selected_tile_type: FieldType | ObjectType
-    draw_mode: bool
-    debug: bool = True
-    fox_stats: np.ndarray = None
-    mean_scores: np.ndarray = None
+class PygameSimulation:
+    def __init__(self, draw_func: Callable[[Self], None]):
+        self.draw_func = draw_func
 
-    def __init__(self):
-        self.sim_settings = get_default_simulation_settings()
-        self.pg_settings = get_default_pygame_settings()
+        self.grid: np.ndarray = None
+        self.objects: np.ndarray = None
+        self.fox_stats: np.ndarray = None
+        self.mean_scores: np.ndarray = None
+
+        self.sim_settings: SimulationSettings = get_default_simulation_settings()
+        self.pg_settings: PygameSettings = get_default_pygame_settings()
         self.sim_settings.generic.grid_size = (self.pg_settings.GRID_WIDTH, self.pg_settings.GRID_HEIGHT)
 
         self.rabbits_in_dens = {}
         self.initialize_grid()
 
-        self.selected_tile_type = FieldType.FOREST
-        self.draw_mode = False
+        self.selected_tile_type: FieldType | ObjectType = FieldType.FOREST
+        self.paused = False
+        self.debug = True
 
         pg.init()
         self.screen = self.create_window()
@@ -106,7 +104,7 @@ class PygameSimulationTest:
             for x in range(xx):
                 if self.objects[y, x] == ObjectType.RABBIT_DEN:
                     self.rabbits_in_dens[(y, x)] = 15
-        
+
 
     def create_window(self):
         window_size = (self.pg_settings.TILE_SIZE * self.sim_settings.generic.grid_size[0],
@@ -115,58 +113,56 @@ class PygameSimulationTest:
 
     def run(self):
         while not self.done:
-            if self.draw_mode:
-                self.clock.tick(60)
-                
-            else:
-                self.clock.tick(self.FPS)
             self.handle_events()
+
+            if self.paused:
+                continue
+
+            self.clock.tick(MAX_FPS)
             self.screen.fill((255, 255, 255))
             self.draw_grid()
 
+            time_of_day = self.time_manager.perform_time_step()
+            self.draw_time_of_day(time_of_day)
+            self.draw_time()
 
-            if not self.draw_mode:
-                time_of_day = self.time_manager.perform_time_step()
-                self.draw_time_of_day(time_of_day)
-                self.draw_time()
+            foxes = self.population_manager.get_foxes()
+            if self.time_manager.date.hour == 0:
+                self.calculate_food_matrix(foxes)
+            if self.time_manager.date.hour == 23:
+                self.hunter.hunt(self.time_manager.date, foxes)
 
-                foxes = self.population_manager.get_foxes()
-                if self.time_manager.date.hour == 0:
-                    self.calculate_food_matrix(foxes)
-                if self.time_manager.date.hour == 23:
-                    self.hunter.hunt(self.time_manager.date, foxes)
-
-                if self.debug:
-                    male_foxes = 0
-                    for fox in foxes:
-                        if fox.sex == Sex.MALE:
-                            male_foxes += 1
-                    print('------------------------------')
-                    print(f'Population size: {len(foxes)}, Male foxes: {male_foxes}, Female foxes: {len(foxes)-male_foxes}')
-                    print(f'Food on map: {np.sum(self.food_matrix)}')
-                    print(f'Max hunger: {np.max([fox.hunger for fox in foxes])}')
-                    print(f'Min hunger: {np.min([fox.hunger for fox in foxes])}')
-                    print(f'Average hunger: {np.mean([fox.hunger for fox in foxes])}')
+            if self.debug:
+                male_foxes = 0
+                for fox in foxes:
+                    if fox.sex == Sex.MALE:
+                        male_foxes += 1
+                print('------------------------------')
+                print(f'Population size: {len(foxes)}, Male foxes: {male_foxes}, Female foxes: {len(foxes)-male_foxes}')
+                print(f'Food on map: {np.sum(self.food_matrix)}')
+                print(f'Max hunger: {np.max([fox.hunger for fox in foxes])}')
+                print(f'Min hunger: {np.min([fox.hunger for fox in foxes])}')
+                print(f'Average hunger: {np.mean([fox.hunger for fox in foxes])}')
 
 
-                if self.time_manager.date.hour == 1:
-                    for rabbit in self.rabbits_in_dens.keys():
-                        self.rabbits_in_dens[rabbit] = 15
+            if self.time_manager.date.hour == 1:
+                for rabbit in self.rabbits_in_dens.keys():
+                    self.rabbits_in_dens[rabbit] = 15
 
-                    if self.time_manager.date.weekday() == 1:
-                        self.fox_stats = np.append(self.fox_stats, [len(foxes)])
-                        self.mean_scores = np.append(self.mean_scores, [round(np.mean(self.fox_stats), 2)])
-                    if self.time_manager.date.day == 1 and len(self.fox_stats) > 0:
-                        plot(self.fox_stats, self.mean_scores)
+                if self.time_manager.date.weekday() == 1:
+                    self.fox_stats = np.append(self.fox_stats, [len(foxes)])
+                    self.mean_scores = np.append(self.mean_scores, [round(np.mean(self.fox_stats), 2)])
+                if self.time_manager.date.day == 1 and len(self.fox_stats) > 0:
+                    plot(self.fox_stats, self.mean_scores)
 
-                if self.time_manager.date.year == 2030:
-                    self.done = True
+            if self.time_manager.date.year == 2030:
+                self.done = True
 
-                self.move_foxes(foxes, self.time_manager.date, self.objects, self.food_matrix, self.rabbits_in_dens)
-                # print(self.time_manager.date.hour, self.rabbits_in_dens)
+            self.move_foxes(foxes, self.time_manager.date, self.objects, self.food_matrix, self.rabbits_in_dens)
+            # print(self.time_manager.date.hour, self.rabbits_in_dens)
 
-                if self.step_by_step:
-                    self.wait_for_space()
+            if self.step_by_step:
+                self.wait_for_space()
 
             pg.display.flip()
 
@@ -178,7 +174,7 @@ class PygameSimulationTest:
                 if event.key == pg.K_ESCAPE:
                     self.done = True
                 elif event.key == pg.K_SPACE:
-                    self.draw_mode = not self.draw_mode
+                    self.paused = not self.paused
                 elif event.key == pg.K_1:
                     self.selected_tile_type = FieldType.GRASS
                     print("Selected grass")
@@ -206,7 +202,7 @@ class PygameSimulationTest:
                 elif event.key == pg.K_p:
                     self.step_by_step = not self.step_by_step
         if pg.mouse.get_pressed()[0]:
-            if self.draw_mode:
+            if self.paused:
                 self.draw_tile()
             else:
                 print("Draw mode is off. To enable it, press space.")
@@ -260,7 +256,7 @@ class PygameSimulationTest:
                                            (self.pg_settings.TILE_SIZE, self.pg_settings.TILE_SIZE))
             self.screen.blit(fox_image,
                              (fox_pos[0] * self.pg_settings.TILE_SIZE, fox_pos[1] * self.pg_settings.TILE_SIZE))
-        
+
         hunter_image = pg.transform.scale(self.pg_settings.object_images[ObjectType.HUNTER],
                                            (self.pg_settings.TILE_SIZE, self.pg_settings.TILE_SIZE))
         self.screen.blit(hunter_image,
@@ -320,5 +316,7 @@ class PygameSimulationTest:
                 self.food_matrix[x, y] += max(0, np.random.normal(0, 0.05))  # adjustable
 
 
-sim = PygameSimulationTest()
-sim.run()
+if __name__ == "__main__":
+    from drawing import draw
+    sim = PygameSimulation(draw)
+    sim.run()
