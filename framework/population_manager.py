@@ -50,7 +50,7 @@ class PopulationManager:
         for i, den_position in enumerate(den_positions):
             self.groups.append(FoxGroup(i, den_position, self.simulation_settings.fox, population_manager=self, date=date))
 
-    def get_foxes(self):
+    def get_foxes(self) -> list[Fox]:
         foxes = []
         for group in self.groups:
             foxes.extend(group.foxes)
