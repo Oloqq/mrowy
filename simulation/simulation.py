@@ -6,48 +6,12 @@ from framework.time_manager import TimeManager
 from framework.plot import plot
 from agents.hunter import Hunter
 from agents.fox import Fox
+from simulation import initialize
 
 import pygame as pg
 import numpy as np
-import os
 
 MAX_FPS = 10
-
-def initialize_grid(save_name: str, sim_settings: SimulationSettings):
-    grid = None
-    objects = None
-    if os.path.exists(save_name):
-        loaded_data = np.load(save_name, allow_pickle=True)
-        loaded_grid = loaded_data['grid']
-        loaded_objects = loaded_data['objects']
-        if (loaded_grid.shape == sim_settings.generic.grid_size and
-                loaded_objects.shape == sim_settings.generic.grid_size):
-            print("Loaded grid from file")
-            grid = loaded_grid
-            objects = loaded_objects
-        elif loaded_grid.shape != sim_settings.generic.grid_size:
-            raise ValueError(f"Grid size in file does not match simulation settings\n"
-                                f"Grid size in file: {loaded_grid.shape}\n"
-                                f"Expected grid size: {sim_settings.generic.grid_size}")
-        else:
-            raise ValueError(f"Object grid size in file does not match simulation settings\n"
-                                f"Grid size in file: {loaded_objects.shape}\n"
-                                f"Expected grid size: {sim_settings.generic.grid_size}")
-    else:
-        # FIXME tworzenie od zera nie działa
-        print("Created new grid")
-        grid = np.full(sim_settings.generic.grid_size, FieldType.GRASS, dtype=FieldType)
-        objects = np.full(sim_settings.generic.grid_size, ObjectType.NOTHING, dtype=ObjectType)
-
-    rabbits_in_dens = {}
-    yy, xx = objects.shape
-    for y in range(yy):
-        for x in range(xx):
-            if objects[y, x] == ObjectType.RABBIT_DEN:
-                rabbits_in_dens[(y, x)] = 15
-
-    return grid, objects, rabbits_in_dens
-
 
 class PygameSimulation:
     class IRenderer:
@@ -57,44 +21,44 @@ class PygameSimulation:
         def draw_tile(sim: "PygameSimulation"):
             raise NotImplementedError
 
-    def __init__(self, save_name: str, renderer: IRenderer, sim_settings: SimulationSettings, pg_settings: DisplaySettings):
+    def __init__(self, save_name: str, renderer: IRenderer, sim_settings: SimulationSettings, display_settings: DisplaySettings):
+        self.save_name = save_name
+        self.sim_settings: SimulationSettings = sim_settings
+        self.display_settings: DisplaySettings = display_settings
+        self.sim_settings.generic.grid_size = (self.display_settings.GRID_WIDTH, self.display_settings.GRID_HEIGHT)
+
+        # initialization
         pg.init()
         self.renderer = renderer
-
-        self.sim_settings: SimulationSettings = sim_settings
-        self.pg_settings: DisplaySettings = pg_settings
-        self.sim_settings.generic.grid_size = (self.pg_settings.GRID_WIDTH, self.pg_settings.GRID_HEIGHT)
-
-        self.grid, self.objects, self.rabbits_in_dens = initialize_grid(save_name, self.sim_settings)
-
-        self.selected_tile_type: FieldType | ObjectType = FieldType.FOREST
-        self.paused = False
-        self.debug = True
-
-        self.screen = self.create_window()
-
-        self.home_range_screen = pg.Surface((self.pg_settings.TILE_SIZE * self.sim_settings.generic.grid_size[0],
-                                        self.pg_settings.TILE_SIZE * self.sim_settings.generic.grid_size[1]))
-        self.home_range_screen.set_alpha(96)
-
-        self.done = False
-
-        # TODO remove
-        self.time_manager = TimeManager(self.sim_settings.generic.time_step)
-        self.population_manager = PopulationManager(self.sim_settings, self.grid)
-
-        self.home_ranges = np.array([])
-        self.draw_home_ranges = True
-
+        self.screen = initialize.window(sim_settings, display_settings)
+        self.grid, self.objects, self.rabbits_in_dens = initialize.grid_and_objects(save_name, sim_settings)
         self.food_matrix = np.array([])
+
+        self.population_manager = PopulationManager(self.sim_settings, self.grid)
         self.initialize_food_matrix()
 
-        self.hunter = Hunter(self.sim_settings.fox.shooting, self.population_manager, self.objects)
 
-        self.step_by_step = False  # if true, the simulation will only advance one step at a time (press enter to advance)
 
+        # app state
+        self.selected_tile_type: FieldType | ObjectType = FieldType.FOREST
+        self.done = False
+        self.paused = False
+        self.debug = True
+        self.step_by_step = False
+
+
+        # simulation state
+        self.home_range_screen = pg.Surface((self.display_settings.TILE_SIZE * self.sim_settings.generic.grid_size[0],
+                                        self.display_settings.TILE_SIZE * self.sim_settings.generic.grid_size[1]))
+        self.home_range_screen.set_alpha(96)
+        self.home_ranges = np.array([])
+        self.draw_home_ranges = True
         self.fox_stats: np.ndarray = np.empty(shape=[0])
         self.mean_scores: np.ndarray = np.empty(shape=[0])
+
+        self.time_manager = TimeManager(self.sim_settings.generic.time_step)# TODO remove
+
+        self.hunter = Hunter(self.sim_settings.fox.shooting, self.population_manager, self.objects)
 
         self.initialize_simulation()
 
@@ -111,11 +75,6 @@ class PygameSimulation:
                         0 <= pos[1] < self.sim_settings.generic.grid_size[1]:
                     self.home_ranges[pos] = 1
 
-
-    def create_window(self):
-        window_size = (self.pg_settings.TILE_SIZE * self.sim_settings.generic.grid_size[0],
-                       self.pg_settings.TILE_SIZE * self.sim_settings.generic.grid_size[1])
-        return pg.display.set_mode(window_size)
 
     def run(self):
         clock = pg.time.Clock()
@@ -200,11 +159,12 @@ class PygameSimulation:
                     self.selected_tile_type = ObjectType.NOTHING
                     print("Selected object eraser")
                 elif event.key == pg.K_s:
-                    np.savez(self.pg_settings.SAVE_NAME, grid=self.grid, objects=self.objects)
+                    np.savez(self.save_name, grid=self.grid, objects=self.objects)
                     print("Saved grid to file")
                 elif event.key == pg.K_p:
                     self.step_by_step = not self.step_by_step
         # REVIEW jaki to ma cel
+        # -> tworzenie map?
         if pg.mouse.get_pressed()[0]:
             if self.paused:
                 self.renderer.draw_tile(self)

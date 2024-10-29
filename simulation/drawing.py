@@ -12,8 +12,8 @@ class FoxRenderer(PygameSimulation.IRenderer):
 
     def draw_tile(self, sim: PygameSimulation):
         mouse_pos = pg.mouse.get_pos()
-        x = mouse_pos[0] // sim.pg_settings.TILE_SIZE
-        y = mouse_pos[1] // sim.pg_settings.TILE_SIZE
+        x = mouse_pos[0] // sim.display_settings.TILE_SIZE
+        y = mouse_pos[1] // sim.display_settings.TILE_SIZE
 
         x = max(min(x, sim.sim_settings.generic.grid_size[0] - 1), 0)
         y = max(min(y, sim.sim_settings.generic.grid_size[1] - 1), 0)
@@ -26,17 +26,17 @@ class FoxRenderer(PygameSimulation.IRenderer):
     def draw_grid(self, sim: PygameSimulation):
         for x in range(sim.sim_settings.generic.grid_size[0]):
             for y in range(sim.sim_settings.generic.grid_size[1]):
-                pg.draw.rect(sim.screen, sim.pg_settings.field_colors[sim.grid[x, y]],
-                                pg.Rect(x * sim.pg_settings.TILE_SIZE, y * sim.pg_settings.TILE_SIZE,
-                                        sim.pg_settings.TILE_SIZE, sim.pg_settings.TILE_SIZE), 0)
+                pg.draw.rect(sim.screen, sim.display_settings.field_colors[sim.grid[x, y]],
+                                pg.Rect(x * sim.display_settings.TILE_SIZE, y * sim.display_settings.TILE_SIZE,
+                                        sim.display_settings.TILE_SIZE, sim.display_settings.TILE_SIZE), 0)
                 if sim.home_ranges[x, y] == 1:
                     pg.draw.rect(sim.home_range_screen, (0, 255, 255),
-                                    pg.Rect(x * sim.pg_settings.TILE_SIZE, y * sim.pg_settings.TILE_SIZE,
-                                            sim.pg_settings.TILE_SIZE, sim.pg_settings.TILE_SIZE), 0)
+                                    pg.Rect(x * sim.display_settings.TILE_SIZE, y * sim.display_settings.TILE_SIZE,
+                                            sim.display_settings.TILE_SIZE, sim.display_settings.TILE_SIZE), 0)
                 if sim.objects[x, y] is not ObjectType.NOTHING:
-                    obj = pg.transform.scale(sim.pg_settings.object_images[sim.objects[x, y]],
-                                                (sim.pg_settings.TILE_SIZE, sim.pg_settings.TILE_SIZE))
-                    sim.screen.blit(obj, (x * sim.pg_settings.TILE_SIZE, y * sim.pg_settings.TILE_SIZE))
+                    obj = pg.transform.scale(sim.display_settings.object_images[sim.objects[x, y]],
+                                                (sim.display_settings.TILE_SIZE, sim.display_settings.TILE_SIZE))
+                    sim.screen.blit(obj, (x * sim.display_settings.TILE_SIZE, y * sim.display_settings.TILE_SIZE))
 
         if sim.draw_home_ranges:
             sim.screen.blit(sim.home_range_screen, (0, 0))
@@ -44,20 +44,20 @@ class FoxRenderer(PygameSimulation.IRenderer):
         for x in range(sim.sim_settings.generic.grid_size[0] // 5):
             for y in range(sim.sim_settings.generic.grid_size[1] // 5):
                 pg.draw.rect(sim.screen, (0, 0, 0, 0),
-                                pg.Rect(x * sim.pg_settings.TILE_SIZE * 5, y * sim.pg_settings.TILE_SIZE * 5,
-                                        sim.pg_settings.TILE_SIZE * 5, sim.pg_settings.TILE_SIZE * 5), 1)
+                                pg.Rect(x * sim.display_settings.TILE_SIZE * 5, y * sim.display_settings.TILE_SIZE * 5,
+                                        sim.display_settings.TILE_SIZE * 5, sim.display_settings.TILE_SIZE * 5), 1)
 
         for fox in sim.population_manager.get_foxes():
             fox_pos = (int(fox.current_position.x), int(fox.current_position.y))
-            fox_image = pg.transform.scale(sim.pg_settings.FOX_IMAGE,
-                                            (sim.pg_settings.TILE_SIZE, sim.pg_settings.TILE_SIZE))
+            fox_image = pg.transform.scale(sim.display_settings.FOX_IMAGE,
+                                            (sim.display_settings.TILE_SIZE, sim.display_settings.TILE_SIZE))
             sim.screen.blit(fox_image,
-                                (fox_pos[0] * sim.pg_settings.TILE_SIZE, fox_pos[1] * sim.pg_settings.TILE_SIZE))
+                                (fox_pos[0] * sim.display_settings.TILE_SIZE, fox_pos[1] * sim.display_settings.TILE_SIZE))
 
-        hunter_image = pg.transform.scale(sim.pg_settings.object_images[ObjectType.HUNTER],
-                                            (sim.pg_settings.TILE_SIZE, sim.pg_settings.TILE_SIZE))
+        hunter_image = pg.transform.scale(sim.display_settings.object_images[ObjectType.HUNTER],
+                                            (sim.display_settings.TILE_SIZE, sim.display_settings.TILE_SIZE))
         sim.screen.blit(hunter_image,
-                            (sim.hunter.position[0] * sim.pg_settings.TILE_SIZE, sim.hunter.position[1] * sim.pg_settings.TILE_SIZE))
+                            (sim.hunter.position[0] * sim.display_settings.TILE_SIZE, sim.hunter.position[1] * sim.display_settings.TILE_SIZE))
 
 
     def draw(self, sim: PygameSimulation):
