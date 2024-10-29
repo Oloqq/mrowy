@@ -5,7 +5,7 @@ from pygame import Vector2
 
 from framework.min_max_random_value import MinMaxRandomValue
 from settings.simulation_settings import ShootingSettings
-from settings.pg_settings import PygameSettings
+from settings.display_settings import DisplaySettings
 from constants.enums import FieldType, ObjectType
 
 class Hunter:
@@ -23,9 +23,9 @@ class Hunter:
         self.position = Vector2(random.choice(self.available_positions))
         self.culling_rate = shooting_settings.default_culling_rate().get_random_value()
         self.shooting_rate = round(shooting_settings.default_shooting_rate().get_random_value())
-        # this will be generated at the beggining of simulation, the very first time hunt() is called        
+        # this will be generated at the beggining of simulation, the very first time hunt() is called
         self.shooting_days = []
-    
+
     # Find every good hunting position (has to be near fox dens and not in water)
     def find_available_positions(self, objects):
         available_positions = []
@@ -36,7 +36,7 @@ class Hunter:
                     if self.look_for_den(x, y, objects):
                         available_positions.append((x,y))
         return available_positions
-    
+
     def look_for_den(self, x, y, objects):
         for i in range(-self.range, self.range+1):
             for j in range(-self.range, self.range+1):
@@ -67,15 +67,15 @@ class Hunter:
             return
         self.shooting_days.remove(date.timetuple().tm_yday)
 
-        # Check how many foxes killed and update 
+        # Check how many foxes killed and update
         foxes_killed = self.shooting_rate
         if foxes_killed == 0:
             self.shooting_rate = round(self.settings.default_shooting_rate().get_random_value())
             return
-        
+
         # Check if mother killed
         mother_cull = random.random() < self.culling_rate
-        
+
         # Look for foxes in the area
         nearby_foxes = []
 
@@ -86,7 +86,7 @@ class Hunter:
         x_max = min(self.position.x+self.range, self.population_manager.grid.shape[0]-1)
         y_min = max(self.position.y-self.range, 0)
         y_max = min(self.position.y+self.range, self.population_manager.grid.shape[1]-1)
-        
+
         for fox in foxes:
             if x_min <= fox.current_position.x <= x_max and y_min <= fox.current_position.y <= y_max:
                 if fox.is_pregnant:

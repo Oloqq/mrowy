@@ -6,7 +6,7 @@ from pygame import Vector2
 from framework.min_max_random_value import MinMaxRandomValue
 from settings.simulation_settings import FoxSimulationSettings
 from constants.enums import Sex, DistributionType, ObjectType, FieldType
-from settings.pg_settings import PygameSettings
+from settings.display_settings import DisplaySettings
 from collections import deque
 
 
@@ -100,13 +100,13 @@ class Fox:
     def set_death_date(self, date):
         year = 1
         while True:
-            if random.random() < self.mortality_rate + ((self.age/12 + year) / 25) or self.age/12 + year == 14: 
+            if random.random() < self.mortality_rate + ((self.age/12 + year) / 25) or self.age/12 + year == 14:
                 day = random.randint(1, 365)
                 hour = random.randint(0, 23)
                 return year+int(date.year), day, hour
             else:
                 year += 1
-                
+
 
     def move(self, date, objects, food_matrix, rabbits_in_dens):
         # Aktywność przy padlinie jest skoncentrowana głównie w godzinach 0:00 -
@@ -116,7 +116,7 @@ class Fox:
 
         # 0:00 - 3:00 i 18:00 - 22:00 - szukaj jedzenia
         # 19:00 - 22:00 - poluj na króliki
-        
+
         if 19 <= date.hour < 22:
             self.hunt_rabbits(objects, rabbits_in_dens)
         if 0 <= date.hour < 3 or 18 <= date.hour < 22:
@@ -137,7 +137,7 @@ class Fox:
         if self.sex == Sex.FEMALE and (date.month == 1 or date.month == 2) and self.age >= self.maturity_age \
                 and self.was_pregnant_this_year is False and self.is_pregnant is False:
             self.search_for_mate()
-        
+
         # Dispersal
         if date.timetuple().tm_yday == self.dispersal_day and not self.has_dispersed:
             self.disperse(objects, date)
@@ -191,7 +191,7 @@ class Fox:
         self.hunger += self.hunger_increase_per_hour
 
     def hunt_rabbits(self, objects, rabbits_in_dens):
-        grid_size = PygameSettings.GRID_WIDTH, PygameSettings.GRID_HEIGHT
+        grid_size = DisplaySettings.GRID_WIDTH, DisplaySettings.GRID_HEIGHT
         # function checks if there is a rabbit den in 5x5 surrounding of fox - if there is, fox feeds on it
         for x in range(int(max(0, self.current_position.x - 2)), int(min(grid_size[0], self.current_position.x + 3))):
             for y in range(int(max(0, self.current_position.y - 2)), int(min(grid_size[1], self.current_position.y + 3))):
@@ -250,7 +250,7 @@ class Fox:
         self.days_till_birth = self.settings.reproduction.default_length_of_gestation().get_random_value()
 
     def disperse(self, objects, date):
-        grid_size = PygameSettings.GRID_WIDTH, PygameSettings.GRID_HEIGHT
+        grid_size = DisplaySettings.GRID_WIDTH, DisplaySettings.GRID_HEIGHT
 
         # find dens in dispersal distance
         queue = deque([(int(self.current_position.x), int(self.current_position.y))])

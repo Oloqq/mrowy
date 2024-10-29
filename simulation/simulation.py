@@ -1,5 +1,5 @@
-from settings.simulation_settings import get_default_simulation_settings, SimulationSettings
-from settings.pg_settings import get_default_pygame_settings, PygameSettings
+from settings.simulation_settings import SimulationSettings
+from settings.display_settings import DisplaySettings
 from constants.enums import FieldType, ObjectType, DayPart, Sex
 from framework.population_manager import PopulationManager
 from framework.time_manager import TimeManager
@@ -13,6 +13,42 @@ import os
 
 MAX_FPS = 10
 
+def initialize_grid(save_name: str, sim_settings: SimulationSettings):
+    grid = None
+    objects = None
+    if os.path.exists(save_name):
+        loaded_data = np.load(save_name, allow_pickle=True)
+        loaded_grid = loaded_data['grid']
+        loaded_objects = loaded_data['objects']
+        if (loaded_grid.shape == sim_settings.generic.grid_size and
+                loaded_objects.shape == sim_settings.generic.grid_size):
+            print("Loaded grid from file")
+            grid = loaded_grid
+            objects = loaded_objects
+        elif loaded_grid.shape != sim_settings.generic.grid_size:
+            raise ValueError(f"Grid size in file does not match simulation settings\n"
+                                f"Grid size in file: {loaded_grid.shape}\n"
+                                f"Expected grid size: {sim_settings.generic.grid_size}")
+        else:
+            raise ValueError(f"Object grid size in file does not match simulation settings\n"
+                                f"Grid size in file: {loaded_objects.shape}\n"
+                                f"Expected grid size: {sim_settings.generic.grid_size}")
+    else:
+        # FIXME tworzenie od zera nie działa
+        print("Created new grid")
+        grid = np.full(sim_settings.generic.grid_size, FieldType.GRASS, dtype=FieldType)
+        objects = np.full(sim_settings.generic.grid_size, ObjectType.NOTHING, dtype=ObjectType)
+
+    rabbits_in_dens = {}
+    yy, xx = objects.shape
+    for y in range(yy):
+        for x in range(xx):
+            if objects[y, x] == ObjectType.RABBIT_DEN:
+                rabbits_in_dens[(y, x)] = 15
+
+    return grid, objects, rabbits_in_dens
+
+
 class PygameSimulation:
     class IRenderer:
         def draw(sim: "PygameSimulation"):
@@ -21,26 +57,20 @@ class PygameSimulation:
         def draw_tile(sim: "PygameSimulation"):
             raise NotImplementedError
 
-    def __init__(self, renderer: IRenderer):
+    def __init__(self, save_name: str, renderer: IRenderer, sim_settings: SimulationSettings, pg_settings: DisplaySettings):
+        pg.init()
         self.renderer = renderer
 
-        self.grid: np.ndarray = None
-        self.objects: np.ndarray = None
-        self.fox_stats: np.ndarray = None
-        self.mean_scores: np.ndarray = None
-
-        self.sim_settings: SimulationSettings = get_default_simulation_settings()
-        self.pg_settings: PygameSettings = get_default_pygame_settings()
+        self.sim_settings: SimulationSettings = sim_settings
+        self.pg_settings: DisplaySettings = pg_settings
         self.sim_settings.generic.grid_size = (self.pg_settings.GRID_WIDTH, self.pg_settings.GRID_HEIGHT)
 
-        self.rabbits_in_dens = {}
-        self.initialize_grid()
+        self.grid, self.objects, self.rabbits_in_dens = initialize_grid(save_name, self.sim_settings)
 
         self.selected_tile_type: FieldType | ObjectType = FieldType.FOREST
         self.paused = False
         self.debug = True
 
-        pg.init()
         self.screen = self.create_window()
         self.night_screen = pg.Surface((self.pg_settings.TILE_SIZE * self.sim_settings.generic.grid_size[0],
                                         self.pg_settings.TILE_SIZE * self.sim_settings.generic.grid_size[1]))
@@ -66,10 +96,12 @@ class PygameSimulation:
 
         self.step_by_step = False  # if true, the simulation will only advance one step at a time (press enter to advance)
 
-        self.fox_stats = np.empty(shape=[0])
-        self.mean_scores = np.empty(shape=[0])
+        self.fox_stats: np.ndarray = np.empty(shape=[0])
+        self.mean_scores: np.ndarray = np.empty(shape=[0])
 
         self.initialize_simulation()
+
+
 
     def initialize_simulation(self):
         fox_dens = np.where(self.objects == ObjectType.FOX_DEN)
@@ -81,35 +113,6 @@ class PygameSimulation:
                 if 0 <= pos[0] < self.sim_settings.generic.grid_size[0] and \
                         0 <= pos[1] < self.sim_settings.generic.grid_size[1]:
                     self.home_ranges[pos] = 1
-
-    def initialize_grid(self):
-        if os.path.exists(self.pg_settings.SAVE_NAME):
-            loaded_data = np.load(self.pg_settings.SAVE_NAME, allow_pickle=True)
-            loaded_grid = loaded_data['grid']
-            loaded_objects = loaded_data['objects']
-            if (loaded_grid.shape == self.sim_settings.generic.grid_size and
-                    loaded_objects.shape == self.sim_settings.generic.grid_size):
-                print("Loaded grid from file")
-                self.grid = loaded_grid
-                self.objects = loaded_objects
-            elif loaded_grid.shape != self.sim_settings.generic.grid_size:
-                raise ValueError(f"Grid size in file does not match simulation settings\n"
-                                 f"Grid size in file: {loaded_grid.shape}\n"
-                                 f"Expected grid size: {self.sim_settings.generic.grid_size}")
-            else:
-                raise ValueError(f"Object grid size in file does not match simulation settings\n"
-                                 f"Grid size in file: {loaded_objects.shape}\n"
-                                 f"Expected grid size: {self.sim_settings.generic.grid_size}")
-        else:
-            print("Created new grid")
-            self.grid = np.full(self.sim_settings.generic.grid_size, FieldType.GRASS, dtype=FieldType)
-            self.objects = np.full(self.sim_settings.generic.grid_size, ObjectType.NOTHING, dtype=ObjectType)
-
-        yy, xx = self.objects.shape
-        for y in range(yy):
-            for x in range(xx):
-                if self.objects[y, x] == ObjectType.RABBIT_DEN:
-                    self.rabbits_in_dens[(y, x)] = 15
 
 
     def create_window(self):
