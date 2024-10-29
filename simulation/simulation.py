@@ -7,9 +7,11 @@ from framework.plot import plot
 from agents.hunter import Hunter
 from agents.fox import Fox
 from simulation import initialize
+from simulation.colony import Colony
 
 import pygame as pg
 import numpy as np
+from pygame import Vector2
 
 MAX_FPS = 10
 
@@ -27,104 +29,38 @@ class PygameSimulation:
         self.display_settings: DisplaySettings = display_settings
         self.sim_settings.generic.grid_size = (self.display_settings.GRID_WIDTH, self.display_settings.GRID_HEIGHT)
 
-        # initialization
+        # display
         pg.init()
         self.renderer = renderer
         self.screen = initialize.window(sim_settings, display_settings)
-        self.grid, self.objects, self.rabbits_in_dens = initialize.grid_and_objects(save_name, sim_settings)
-        self.food_matrix = np.array([])
-
-        self.population_manager = PopulationManager(self.sim_settings, self.grid)
-        self.initialize_food_matrix()
-
-
+        self.grid, self.objects = initialize.grid_and_objects(save_name, sim_settings)
 
         # app state
         self.selected_tile_type: FieldType | ObjectType = FieldType.FOREST
         self.done = False
         self.paused = False
-        self.debug = True
-        self.step_by_step = False
+        self.debug = False
+        self.step_by_step = True
+        self.step_requested = True
 
-
-        # simulation state
-        self.home_range_screen = pg.Surface((self.display_settings.TILE_SIZE * self.sim_settings.generic.grid_size[0],
-                                        self.display_settings.TILE_SIZE * self.sim_settings.generic.grid_size[1]))
-        self.home_range_screen.set_alpha(96)
-        self.home_ranges = np.array([])
-        self.draw_home_ranges = True
-        self.fox_stats: np.ndarray = np.empty(shape=[0])
-        self.mean_scores: np.ndarray = np.empty(shape=[0])
-
-        self.time_manager = TimeManager(self.sim_settings.generic.time_step)# TODO remove
-
-        self.hunter = Hunter(self.sim_settings.fox.shooting, self.population_manager, self.objects)
-
-        self.initialize_simulation()
-
-
-
-    def initialize_simulation(self):
-        fox_dens = np.where(self.objects == ObjectType.FOX_DEN)
-        self.population_manager.create_population(list(zip(*fox_dens)), self.time_manager.date)
-        self.home_ranges = np.full(self.sim_settings.generic.grid_size, 0, dtype=object)
-
-        for fox in self.population_manager.get_foxes():
-            for pos in fox.home_range:
-                if 0 <= pos[0] < self.sim_settings.generic.grid_size[0] and \
-                        0 <= pos[1] < self.sim_settings.generic.grid_size[1]:
-                    self.home_ranges[pos] = 1
-
+        # simulation logic
+        foods1 = [Vector2(5, 10), Vector2(10, 10)]
+        self.colonies: list[Colony] = [Colony(Vector2(5, 5), foods1)]
 
     def run(self):
         clock = pg.time.Clock()
         while not self.done:
+            clock.tick(MAX_FPS)
             self.handle_events()
 
-            if self.paused:
+            if self.paused or (self.step_by_step and not self.step_requested):
                 continue
 
-            clock.tick(MAX_FPS)
+            self.step_requested = False
+            for colony in self.colonies:
+                colony.step()
             self.screen.fill((255, 255, 255))
             self.renderer.draw(self)
-
-            foxes = self.population_manager.get_foxes()
-            if self.time_manager.date.hour == 0:
-                self.calculate_food_matrix(foxes)
-            if self.time_manager.date.hour == 23:
-                self.hunter.hunt(self.time_manager.date, foxes)
-
-            if self.debug:
-                male_foxes = 0
-                for fox in foxes:
-                    if fox.sex == Sex.MALE:
-                        male_foxes += 1
-                print('------------------------------')
-                print(f'Population size: {len(foxes)}, Male foxes: {male_foxes}, Female foxes: {len(foxes)-male_foxes}')
-                print(f'Food on map: {np.sum(self.food_matrix)}')
-                print(f'Max hunger: {np.max([fox.hunger for fox in foxes])}')
-                print(f'Min hunger: {np.min([fox.hunger for fox in foxes])}')
-                print(f'Average hunger: {np.mean([fox.hunger for fox in foxes])}')
-
-
-            if self.time_manager.date.hour == 1:
-                for rabbit in self.rabbits_in_dens.keys():
-                    self.rabbits_in_dens[rabbit] = 15
-
-                if self.time_manager.date.weekday() == 1:
-                    self.fox_stats = np.append(self.fox_stats, [len(foxes)])
-                    self.mean_scores = np.append(self.mean_scores, [round(np.mean(self.fox_stats), 2)])
-                if self.time_manager.date.day == 1 and len(self.fox_stats) > 0:
-                    plot(self.fox_stats, self.mean_scores)
-
-            if self.time_manager.date.year == 2030:
-                self.done = True
-
-            self.move_foxes(foxes, self.time_manager.date, self.objects, self.food_matrix, self.rabbits_in_dens)
-            # print(self.time_manager.date.hour, self.rabbits_in_dens)
-
-            if self.step_by_step:
-                self.wait_for_space()
 
             pg.display.flip()
 
@@ -137,6 +73,8 @@ class PygameSimulation:
                     self.done = True
                 elif event.key == pg.K_SPACE:
                     self.paused = not self.paused
+                elif event.key == pg.K_TAB:
+                    self.step_requested = True
                 elif event.key == pg.K_1:
                     self.selected_tile_type = FieldType.GRASS
                     print("Selected grass")
@@ -163,47 +101,8 @@ class PygameSimulation:
                     print("Saved grid to file")
                 elif event.key == pg.K_p:
                     self.step_by_step = not self.step_by_step
-        # REVIEW jaki to ma cel
-        # -> tworzenie map?
         if pg.mouse.get_pressed()[0]:
             if self.paused:
                 self.renderer.draw_tile(self)
             else:
                 print("Draw mode is off. To enable it, press space.")
-
-    def move_foxes(self, foxes, date, objects, food_matrix, rabbits_in_dens):
-        for fox in reversed(foxes):
-            fox.move(date, objects, food_matrix, rabbits_in_dens)
-
-    def wait_for_space(self):
-        stop_flag = 1
-        while stop_flag > 0 and not self.done:
-            for event in pg.event.get():
-                if event.type == pg.KEYDOWN:
-                    if event.key == pg.K_RETURN:
-                        stop_flag = 0
-                    elif event.key == pg.K_p:
-                        self.step_by_step = not self.step_by_step
-                        stop_flag = 0
-                    elif event.key == pg.K_ESCAPE:
-                        self.done = True
-                elif event.type == pg.QUIT:
-                    self.done = True
-
-    def initialize_food_matrix(self):
-        self.food_matrix = np.zeros((self.sim_settings.generic.grid_size[0],
-                                    self.sim_settings.generic.grid_size[1]))
-        self.calculate_food_matrix(self.population_manager.get_foxes())
-
-    def calculate_food_matrix(self, foxes):
-        for x in range(self.sim_settings.generic.grid_size[0]):
-            for y in range(self.sim_settings.generic.grid_size[1]):
-                neighborhood_x = slice(max(0, x - 1), min(self.sim_settings.generic.grid_size[0], x + 2))
-                neighborhood_y = slice(max(0, y - 1), min(self.sim_settings.generic.grid_size[1], y + 2))
-
-                fox_count = sum(
-                    1 for fox in foxes if
-                    neighborhood_x.start <= fox.current_position.x < neighborhood_x.stop and
-                    neighborhood_y.start <= fox.current_position.y < neighborhood_y.stop
-                )
-                self.food_matrix[x, y] += max(0, np.random.normal(0, 0.05))  # adjustable

@@ -1,4 +1,4 @@
-from constants.enums import FieldType, ObjectType
+from constants.enums import FieldType
 from dataclasses import dataclass
 import pygame as pg
 
@@ -12,11 +12,7 @@ class DisplaySettings:
         FieldType.WATER: (0, 0, 255),
         FieldType.URBAN: (100, 100, 100)
     }
-    object_images = {
-        ObjectType.HUNTER: pg.image.load('assets/hunter.png'),
-        ObjectType.FOX_DEN: pg.image.load('assets/fox_den.png'),
-        ObjectType.RABBIT_DEN: pg.image.load('assets/rabbit_den.png')
-    }
-    FOX_IMAGE = pg.image.load("assets/fox.png") #did not see it anywhere else so I added it here
+    ant_image = pg.image.load("assets/ant.png")
+    colony_image = pg.image.load('assets/colony.png')
     GRID_WIDTH = 30
     GRID_HEIGHT = 50

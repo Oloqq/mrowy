@@ -32,21 +32,21 @@ def grid_and_objects(save_name: str, sim_settings: SimulationSettings):
         grid = np.full(sim_settings.generic.grid_size, FieldType.GRASS, dtype=FieldType)
         objects = np.full(sim_settings.generic.grid_size, ObjectType.NOTHING, dtype=ObjectType)
 
-    rabbits_in_dens = {}
-    yy, xx = objects.shape
-    for y in range(yy):
-        for x in range(xx):
-            if objects[y, x] == ObjectType.RABBIT_DEN:
-                rabbits_in_dens[(y, x)] = 15
+    # rabbits_in_dens = {}
+    # yy, xx = objects.shape
+    # for y in range(yy):
+    #     for x in range(xx):
+    #         if objects[y, x] == ObjectType.RABBIT_DEN:
+    #             rabbits_in_dens[(y, x)] = 15
 
-    return grid, objects, rabbits_in_dens
+    return grid, objects
 
 def window(sim_settings: SimulationSettings, display_settings: DisplaySettings):
     window_size = (display_settings.TILE_SIZE * sim_settings.generic.grid_size[0],
                     display_settings.TILE_SIZE * sim_settings.generic.grid_size[1])
     return pg.display.set_mode(window_size)
 
-# def simulation(objects, sim_settings: SimulationSettings):
+# def fox_homes(objects, sim_settings: SimulationSettings):
 #     fox_dens = np.where(self.objects == ObjectType.FOX_DEN)
 #     self.population_manager.create_population(list(zip(*fox_dens)), self.time_manager.date)
 #     self.home_ranges = np.full(sim_settings.generic.grid_size, 0, dtype=object)

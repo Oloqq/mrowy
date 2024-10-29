@@ -3,7 +3,7 @@ from settings.display_settings import DisplaySettings
 from simulation.simulation import PygameSimulation
 from simulation.drawing import FoxRenderer
 
-def start_gridnpz():
+def start_fox():
     sim = PygameSimulation(
         "grid.npz",
         FoxRenderer(),
@@ -12,9 +12,9 @@ def start_gridnpz():
         )
     sim.run()
 
-def start_fresh():
+def start_ant():
     sim = PygameSimulation(
-        "asdas",
+        "ant.npz",
         FoxRenderer(),
         get_default_simulation_settings(),
         DisplaySettings()
@@ -22,5 +22,5 @@ def start_fresh():
     sim.run()
 
 if __name__ == "__main__":
-    start_gridnpz()
-    # start_fresh()
+    start_fox()
+    # start_ant()

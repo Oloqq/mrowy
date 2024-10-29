@@ -4,10 +4,9 @@ from constants.enums import FieldType, ObjectType, DayPart, Sex
 import pygame as pg
 
 class FoxRenderer(PygameSimulation.IRenderer):
-    def draw_time(self, sim: PygameSimulation):
-        formatted_date = sim.time_manager.date.strftime("%d/%m/%Y %H:%M:%S")
+    def draw_text(self, sim: PygameSimulation):
         font = pg.font.SysFont("Arial", 20)
-        text = font.render(formatted_date, True, (255, 255, 255))
+        text = font.render("lecymy duuuur", True, (255, 255, 255))
         sim.screen.blit(text, (10, 10))
 
     def draw_tile(self, sim: PygameSimulation):
@@ -29,37 +28,22 @@ class FoxRenderer(PygameSimulation.IRenderer):
                 pg.draw.rect(sim.screen, sim.display_settings.field_colors[sim.grid[x, y]],
                                 pg.Rect(x * sim.display_settings.TILE_SIZE, y * sim.display_settings.TILE_SIZE,
                                         sim.display_settings.TILE_SIZE, sim.display_settings.TILE_SIZE), 0)
-                if sim.home_ranges[x, y] == 1:
-                    pg.draw.rect(sim.home_range_screen, (0, 255, 255),
-                                    pg.Rect(x * sim.display_settings.TILE_SIZE, y * sim.display_settings.TILE_SIZE,
-                                            sim.display_settings.TILE_SIZE, sim.display_settings.TILE_SIZE), 0)
-                if sim.objects[x, y] is not ObjectType.NOTHING:
-                    obj = pg.transform.scale(sim.display_settings.object_images[sim.objects[x, y]],
-                                                (sim.display_settings.TILE_SIZE, sim.display_settings.TILE_SIZE))
-                    sim.screen.blit(obj, (x * sim.display_settings.TILE_SIZE, y * sim.display_settings.TILE_SIZE))
 
-        if sim.draw_home_ranges:
-            sim.screen.blit(sim.home_range_screen, (0, 0))
-
-        for x in range(sim.sim_settings.generic.grid_size[0] // 5):
-            for y in range(sim.sim_settings.generic.grid_size[1] // 5):
-                pg.draw.rect(sim.screen, (0, 0, 0, 0),
-                                pg.Rect(x * sim.display_settings.TILE_SIZE * 5, y * sim.display_settings.TILE_SIZE * 5,
-                                        sim.display_settings.TILE_SIZE * 5, sim.display_settings.TILE_SIZE * 5), 1)
-
-        for fox in sim.population_manager.get_foxes():
-            fox_pos = (int(fox.current_position.x), int(fox.current_position.y))
-            fox_image = pg.transform.scale(sim.display_settings.FOX_IMAGE,
-                                            (sim.display_settings.TILE_SIZE, sim.display_settings.TILE_SIZE))
-            sim.screen.blit(fox_image,
-                                (fox_pos[0] * sim.display_settings.TILE_SIZE, fox_pos[1] * sim.display_settings.TILE_SIZE))
-
-        hunter_image = pg.transform.scale(sim.display_settings.object_images[ObjectType.HUNTER],
-                                            (sim.display_settings.TILE_SIZE, sim.display_settings.TILE_SIZE))
-        sim.screen.blit(hunter_image,
-                            (sim.hunter.position[0] * sim.display_settings.TILE_SIZE, sim.hunter.position[1] * sim.display_settings.TILE_SIZE))
-
+    def draw_colonies(self, sim: PygameSimulation):
+        for colony in sim.colonies:
+            cx, cy = colony.pos
+            scaled = pg.transform.scale(sim.display_settings.colony_image,
+                (sim.display_settings.TILE_SIZE,
+                    sim.display_settings.TILE_SIZE))
+            sim.screen.blit(scaled, (cx * sim.display_settings.TILE_SIZE, cy * sim.display_settings.TILE_SIZE))
+            for ant in colony.ants:
+                ax, ay = ant.pos
+                scaled = pg.transform.scale(sim.display_settings.ant_image,
+                    (sim.display_settings.TILE_SIZE,
+                    sim.display_settings.TILE_SIZE))
+                sim.screen.blit(scaled, (ax * sim.display_settings.TILE_SIZE, ay * sim.display_settings.TILE_SIZE))
 
     def draw(self, sim: PygameSimulation):
         self.draw_grid(sim)
-        self.draw_time(sim)
+        self.draw_colonies(sim)
+        self.draw_text(sim)
