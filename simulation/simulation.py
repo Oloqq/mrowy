@@ -72,10 +72,6 @@ class PygameSimulation:
         self.debug = True
 
         self.screen = self.create_window()
-        self.night_screen = pg.Surface((self.pg_settings.TILE_SIZE * self.sim_settings.generic.grid_size[0],
-                                        self.pg_settings.TILE_SIZE * self.sim_settings.generic.grid_size[1]))
-        self.night_screen.set_alpha(96)
-        self.night_screen.fill((0, 0, 0))
 
         self.home_range_screen = pg.Surface((self.pg_settings.TILE_SIZE * self.sim_settings.generic.grid_size[0],
                                         self.pg_settings.TILE_SIZE * self.sim_settings.generic.grid_size[1]))
@@ -83,6 +79,7 @@ class PygameSimulation:
 
         self.done = False
 
+        # TODO remove
         self.time_manager = TimeManager(self.sim_settings.generic.time_step)
         self.population_manager = PopulationManager(self.sim_settings, self.grid)
 

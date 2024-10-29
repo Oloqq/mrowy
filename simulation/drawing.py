@@ -59,25 +59,7 @@ class FoxRenderer(PygameSimulation.IRenderer):
         sim.screen.blit(hunter_image,
                             (sim.hunter.position[0] * sim.pg_settings.TILE_SIZE, sim.hunter.position[1] * sim.pg_settings.TILE_SIZE))
 
-    def draw_time_of_day(self, sim: PygameSimulation, time_of_day: DayPart):
-        # print(sim.time_manager.date, time_of_day)
-        match time_of_day:
-            case DayPart.NIGHT:
-                sim.screen.blit(sim.night_screen, (0, 0))
-            case DayPart.DAY:
-                pass
-            case DayPart.DAWN:
-                sim.night_screen.set_alpha(48)
-                sim.screen.blit(sim.night_screen, (0, 0))
-                sim.night_screen.set_alpha(96)
-            case DayPart.DUSK:
-                sim.night_screen.set_alpha(48)
-                sim.screen.blit(sim.night_screen, (0, 0))
-                sim.night_screen.set_alpha(96)
-
 
     def draw(self, sim: PygameSimulation):
         self.draw_grid(sim)
-        time_of_day = sim.time_manager.perform_time_step()
-        self.draw_time_of_day(sim, time_of_day)
         self.draw_time(sim)
