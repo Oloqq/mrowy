@@ -29,7 +29,7 @@ class PygameSimulation:
         pg.init()
         self.renderer = renderer
         self.screen = initialize.window(sim_settings, display_settings)
-        self.grid, self.objects = initialize.grid_and_objects(save_name, sim_settings)
+        self.grid, self.objects, self.nodes = initialize.grid_and_objects(save_name, sim_settings)
 
         # app state
         self.selected_tile_type: FieldType | ObjectType = FieldType.FOREST
@@ -40,7 +40,7 @@ class PygameSimulation:
         self.step_requested = True
 
         # simulation logic
-        foods1 = [Vector2(5, 10), Vector2(10, 10)]
+        foods1 = [Vector2(5, 10)]
         self.colonies: list[Colony] = [Colony(Vector2(5, 5), foods1)]
 
     def run(self):

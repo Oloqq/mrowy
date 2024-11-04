@@ -1,7 +1,6 @@
 from simulation.ant import Ant
 
 from pygame import Vector2
-import random
 
 class Colony:
     counter: int = 0
@@ -14,11 +13,14 @@ class Colony:
         self.pos = position
         self.foods = foods
 
-        self.ants: list[Ant] = [Ant(Vector2(12, 12))]
+        self.ants: list[Ant] = []
 
     def step(self):
+        # TEMP: keep one ant alive
+        assert len(self.ants) <= 1
+        assert len(self.foods) == 1
+        if len(self.ants) == 0:
+            self.ants.append(Ant(Vector2(self.pos.x, self.pos.y)))
+
         for ant in self.ants:
             ant.step()
-
-        self.ants = [ant for ant in self.ants if ant.life > 0]
-        self.ants.append(Ant(self.pos + Vector2(random.randint(1, 6), 1)))
