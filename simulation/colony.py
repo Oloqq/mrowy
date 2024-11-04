@@ -22,7 +22,15 @@ class Colony:
         assert len(self.ants) <= 1
         assert len(self.foods) == 1
         if len(self.ants) == 0:
-            self.ants.append(Ant(Vector2(self.pos.x, self.pos.y)))
+            self.ants.append(
+                Ant(
+                    position=Vector2(self.pos.x, self.pos.y),
+                    destination=Vector2(self.foods[0].x, self.foods[0].y),
+                    pheromone_flavor=self.id
+                )
+            )
 
         for ant in self.ants:
             ant.step(grid, objects, nodes)
+
+        self.ants = [ant for ant in self.ants if not ant.finished()]
