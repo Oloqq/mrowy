@@ -1,6 +1,8 @@
 from simulation.ant import Ant
+from simulation.node import Node
 
 from pygame import Vector2
+import numpy as np
 
 class Colony:
     counter: int = 0
@@ -15,7 +17,7 @@ class Colony:
 
         self.ants: list[Ant] = []
 
-    def step(self):
+    def step(self, grid: np.ndarray, objects: np.ndarray, nodes: list[list[Node]]):
         # TEMP: keep one ant alive
         assert len(self.ants) <= 1
         assert len(self.foods) == 1
@@ -23,4 +25,4 @@ class Colony:
             self.ants.append(Ant(Vector2(self.pos.x, self.pos.y)))
 
         for ant in self.ants:
-            ant.step()
+            ant.step(grid, objects, nodes)

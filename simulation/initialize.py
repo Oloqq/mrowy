@@ -7,7 +7,7 @@ import os
 import numpy as np
 import pygame as pg
 
-def grid_and_objects(save_name: str, sim_settings: SimulationSettings):
+def grid_and_objects(save_name: str, sim_settings: SimulationSettings) -> tuple[np.ndarray, np.ndarray, list[list[Node]]]:
     grid: np.ndarray
     nodes: list[list[Node]] = []
     objects = None
@@ -38,7 +38,7 @@ def grid_and_objects(save_name: str, sim_settings: SimulationSettings):
     for x, column in enumerate(grid):
         node_column = []
         for y, val in enumerate(column):
-            node_column.append(Node())
+            node_column.append(Node((False, False, False, False)))
         nodes.append(node_column)
 
     return grid, objects, nodes

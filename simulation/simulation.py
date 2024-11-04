@@ -34,10 +34,10 @@ class PygameSimulation:
         # app state
         self.selected_tile_type: FieldType | ObjectType = FieldType.FOREST
         self.done = False
-        self.paused = False
+        self.paused = True
         self.debug = False
         self.step_by_step = True
-        self.step_requested = True
+        self.step_requested = False
 
         # simulation logic
         foods1 = [Vector2(5, 10)]
@@ -49,11 +49,11 @@ class PygameSimulation:
             clock.tick(MAX_FPS)
             self.handle_events()
 
-            need_to_step = self.step_by_step and not self.step_requested
-            if not self.paused and not need_to_step:
+            need_to_step = self.step_by_step and self.step_requested
+            if not self.paused or need_to_step:
                 self.step_requested = False
                 for colony in self.colonies:
-                    colony.step()
+                    colony.step(self.grid, self.objects, self.nodes)
 
             self.screen.fill((255, 255, 255))
             self.renderer.draw(self)
@@ -99,6 +99,7 @@ class PygameSimulation:
                     self.step_by_step = not self.step_by_step
         if pg.mouse.get_pressed()[0]:
             if self.paused:
+                # TODO nodes have to be updated as well
                 self.renderer.draw_tile(self)
             else:
                 print("Draw mode is off. To enable it, press space.")
