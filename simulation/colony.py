@@ -3,9 +3,6 @@ from simulation.ant import Ant
 from pygame import Vector2
 import random
 
-# https://people.idsia.ch/~luca/ij_23-alife99.pdf
-# rozdzial 3, 3.2.1
-
 class Colony:
     counter: int = 0
 
