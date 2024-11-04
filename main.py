@@ -3,16 +3,7 @@ from settings.display_settings import DisplaySettings
 from simulation.simulation import PygameSimulation
 from simulation.drawing import AntRenderer
 
-def start_fox():
-    sim = PygameSimulation(
-        "grid.npz",
-        AntRenderer(),
-        get_default_simulation_settings(),
-        DisplaySettings()
-        )
-    sim.run()
-
-def start_ant():
+def main():
     sim = PygameSimulation(
         "ant.npz",
         AntRenderer(),
@@ -21,6 +12,6 @@ def start_ant():
         )
     sim.run()
 
+
 if __name__ == "__main__":
-    start_fox()
-    # start_ant()
+    main()

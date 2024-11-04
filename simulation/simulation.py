@@ -1,11 +1,7 @@
 from settings.simulation_settings import SimulationSettings
 from settings.display_settings import DisplaySettings
 from constants.enums import FieldType, ObjectType, DayPart, Sex
-from framework.population_manager import PopulationManager
-from framework.time_manager import TimeManager
-from framework.plot import plot
-from agents.hunter import Hunter
-from agents.fox import Fox
+
 from simulation import initialize
 from simulation.colony import Colony
 
