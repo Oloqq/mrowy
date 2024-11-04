@@ -53,12 +53,12 @@ class PygameSimulation:
             clock.tick(MAX_FPS)
             self.handle_events()
 
-            if self.paused or (self.step_by_step and not self.step_requested):
-                continue
+            need_to_step = self.step_by_step and not self.step_requested
+            if not self.paused and not need_to_step:
+                self.step_requested = False
+                for colony in self.colonies:
+                    colony.step()
 
-            self.step_requested = False
-            for colony in self.colonies:
-                colony.step()
             self.screen.fill((255, 255, 255))
             self.renderer.draw(self)
 

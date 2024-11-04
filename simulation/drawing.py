@@ -3,10 +3,10 @@ from constants.enums import FieldType, ObjectType, DayPart, Sex
 
 import pygame as pg
 
-class FoxRenderer(PygameSimulation.IRenderer):
+class AntRenderer(PygameSimulation.IRenderer):
     def draw_text(self, sim: PygameSimulation):
         font = pg.font.SysFont("Arial", 20)
-        text = font.render("lecymy duuuur", True, (255, 255, 255))
+        text = font.render("paused" if sim.paused else "running", True, (255, 255, 255))
         sim.screen.blit(text, (10, 10))
 
     def draw_tile(self, sim: PygameSimulation):
@@ -42,6 +42,13 @@ class FoxRenderer(PygameSimulation.IRenderer):
                     (sim.display_settings.TILE_SIZE,
                     sim.display_settings.TILE_SIZE))
                 sim.screen.blit(scaled, (ax * sim.display_settings.TILE_SIZE, ay * sim.display_settings.TILE_SIZE))
+            for food in colony.foods:
+                fx, fy = food
+                scaled = pg.transform.scale(sim.display_settings.food_image,
+                (sim.display_settings.TILE_SIZE,
+                 sim.display_settings.TILE_SIZE))
+                sim.screen.blit(scaled, (fx * sim.display_settings.TILE_SIZE, fy * sim.display_settings.TILE_SIZE))
+
 
     def draw(self, sim: PygameSimulation):
         self.draw_grid(sim)

@@ -13,6 +13,7 @@ class DisplaySettings:
         FieldType.URBAN: (100, 100, 100)
     }
     ant_image = pg.image.load("assets/ant.png")
-    colony_image = pg.image.load('assets/colony.png')
+    colony_image = pg.image.load("assets/colony.png")
+    food_image = pg.image.load("assets/food.png")
     GRID_WIDTH = 30
     GRID_HEIGHT = 50

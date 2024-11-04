@@ -1,12 +1,12 @@
 from settings.simulation_settings import get_default_simulation_settings
 from settings.display_settings import DisplaySettings
 from simulation.simulation import PygameSimulation
-from simulation.drawing import FoxRenderer
+from simulation.drawing import AntRenderer
 
 def start_fox():
     sim = PygameSimulation(
         "grid.npz",
-        FoxRenderer(),
+        AntRenderer(),
         get_default_simulation_settings(),
         DisplaySettings()
         )
@@ -15,7 +15,7 @@ def start_fox():
 def start_ant():
     sim = PygameSimulation(
         "ant.npz",
-        FoxRenderer(),
+        AntRenderer(),
         get_default_simulation_settings(),
         DisplaySettings()
         )
