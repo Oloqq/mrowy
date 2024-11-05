@@ -11,6 +11,7 @@ class Ant:
         self.pos = position
         self.destination = destination
         self.pheromone_flavor = pheromone_flavor
+        self.travel_time = 0
 
     def choose_step_direction(self, from_node: Node) -> Direction:
         def explore():
@@ -27,6 +28,8 @@ class Ant:
             return Direction(relevant_smells.argmax())
 
     def step(self, grid: np.ndarray, objects: np.ndarray, nodes: list[list[Node]]):
+        self.travel_time += 1
+
         x, y = self.pos
         # FIXME Vector2 stores floats, so is useless here
         x = int(x)
@@ -39,6 +42,7 @@ class Ant:
         next_node: Node = nodes[x+dx][y+dy]
 
         # ants can occasionally get stuck (for a single step) if they try to explore in an inpassable direction
+        # NOTE if a node has no capacity, the ant will just wait, is it ok?
         if next_node.spare_capacity > 0 and current_node.has_neighbor[direction.value]:
             self.pos += direction.to_vector()
             self.transfer(source=current_node, direction=direction, to=next_node)
@@ -51,8 +55,10 @@ class Ant:
 
 
     def deposit_pheromone(self, current_node: Node, direction: Direction):
-        increase = 0.0 # TODO
-        current_node.pheromones[self.pheromone_flavor][direction.value] += increase
+        # pheromone amount is represented as tau (τ) in the article
+        # calculating ∆τ is just described as a function of ant age so I'm improvising
+        delta_tau = 1 / self.travel_time
+        current_node.pheromones[self.pheromone_flavor][direction.value] += delta_tau
 
     def finished(self) -> bool: # needed?
         return self.pos == self.destination
