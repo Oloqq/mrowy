@@ -39,10 +39,14 @@ def grid_and_objects(save_name: str, sim_settings: SimulationSettings) -> tuple[
         node_column = []
         for y, val in enumerate(column):
             # TODO check tile kind
-            up = y > 0
-            right = x < sim_settings.generic.grid_size[0]
-            down = y < sim_settings.generic.grid_size[1]
-            left = x > 0
+            up = y > 0 and grid[x][y-1] != FieldType.WATER
+            # right = x < sim_settings.generic.grid_size[0]
+            # down = y < sim_settings.generic.grid_size[1] # FIXME sim_settings grid size does not match reality (those lines casue index error)
+            right = x < 5 and grid[x+1][y] != FieldType.WATER
+            # print(down)
+            down = y < 15 and grid[x][y+1] != FieldType.WATER
+            left = x > 0 and grid[x-1][y] != FieldType.WATER
+
             node_column.append(Node((up, right, down, left)))
         nodes.append(node_column)
 

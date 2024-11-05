@@ -41,8 +41,8 @@ class PygameSimulation:
         self.show_pheromones = True
 
         # simulation logic
-        foods1 = [Vector2(5, 10)]
-        self.colonies: list[Colony] = [Colony(Vector2(5, 5), foods1)]
+        foods1 = [Vector2(0, 10)]
+        self.colonies: list[Colony] = [Colony(Vector2(0, 2), foods1)]
 
     def run(self):
         clock = pg.time.Clock()
@@ -71,7 +71,8 @@ class PygameSimulation:
                 elif event.key == pg.K_SPACE:
                     self.paused = not self.paused
                 elif event.key == pg.K_TAB:
-                    self.step_requested = True
+                    if self.step_by_step:
+                        self.step_requested = True
                 elif event.key == pg.K_1:
                     self.selected_tile_type = FieldType.GRASS
                     print("Selected grass")
