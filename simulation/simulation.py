@@ -38,6 +38,7 @@ class PygameSimulation:
         self.debug = False
         self.step_by_step = True
         self.step_requested = False
+        self.show_pheromones = True
 
         # simulation logic
         foods1 = [Vector2(5, 10)]
@@ -97,6 +98,8 @@ class PygameSimulation:
                     print("Saved grid to file")
                 elif event.key == pg.K_p:
                     self.step_by_step = not self.step_by_step
+                elif event.key == pg.K_f:
+                    self.show_pheromones = not self.show_pheromones
         if pg.mouse.get_pressed()[0]:
             if self.paused:
                 # TODO nodes have to be updated as well

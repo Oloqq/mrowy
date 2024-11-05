@@ -1,4 +1,5 @@
 from simulation.simulation import PygameSimulation
+from simulation.node import Node
 from constants.enums import FieldType, ObjectType, DayPart, Sex
 
 import pygame as pg
@@ -49,8 +50,26 @@ class AntRenderer(PygameSimulation.IRenderer):
                  sim.display_settings.TILE_SIZE))
                 sim.screen.blit(scaled, (fx * sim.display_settings.TILE_SIZE, fy * sim.display_settings.TILE_SIZE))
 
+    def draw_pheromones(self, sim: PygameSimulation):
+        TMP_PHEROMONE_FLAVOR = 0 # TODO switch between flavors
+        for x in range(sim.sim_settings.generic.grid_size[0]):
+            for y in range(sim.sim_settings.generic.grid_size[1]):
+                color = (int(255 * sim.nodes[x][y].mean_intensity(TMP_PHEROMONE_FLAVOR)), 0, 0)
+                pg.draw.rect(
+                    sim.screen,
+                    color,
+                    pg.Rect(
+                        x * sim.display_settings.TILE_SIZE,
+                        y * sim.display_settings.TILE_SIZE,
+                        sim.display_settings.TILE_SIZE,
+                        sim.display_settings.TILE_SIZE
+                    ),
+                0)
+
 
     def draw(self, sim: PygameSimulation):
         self.draw_grid(sim)
+        if sim.show_pheromones:
+            self.draw_pheromones(sim)
         self.draw_colonies(sim)
         self.draw_text(sim)

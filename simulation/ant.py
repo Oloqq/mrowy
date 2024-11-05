@@ -17,7 +17,7 @@ class Ant:
         def explore():
             return random.choice(list(Direction))
 
-        TMP_EXPLORATION_CHANCE = 0.1 # TODO simulation settings
+        TMP_EXPLORATION_CHANCE = 0.2 # TODO simulation settings
         if random.random() < TMP_EXPLORATION_CHANCE:
             return explore()
         else:
@@ -57,7 +57,7 @@ class Ant:
     def deposit_pheromone(self, current_node: Node, direction: Direction):
         # pheromone amount is represented as tau (τ) in the article
         # calculating ∆τ is just described as a function of ant age so I'm improvising
-        delta_tau = 1 / self.travel_time
+        delta_tau = 1 / np.sqrt(self.travel_time)
         current_node.pheromones[self.pheromone_flavor][direction.value] += delta_tau
 
     def finished(self) -> bool: # needed?

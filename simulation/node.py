@@ -38,3 +38,7 @@ class Node:
     def can_move_into(self) -> bool:
         return self.spare_capacity > 0
 
+    def mean_intensity(self, flavor: int) -> float:
+        TMP_MAX_SMELL = 3 # TODO how to determine
+        s = min(np.sum(self.pheromones[flavor]), TMP_MAX_SMELL)
+        return s / TMP_MAX_SMELL
