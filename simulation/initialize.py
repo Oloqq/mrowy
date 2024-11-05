@@ -38,7 +38,12 @@ def grid_and_objects(save_name: str, sim_settings: SimulationSettings) -> tuple[
     for x, column in enumerate(grid):
         node_column = []
         for y, val in enumerate(column):
-            node_column.append(Node((False, False, False, False)))
+            # TODO check tile kind
+            up = y > 0
+            right = x < sim_settings.generic.grid_size[0]
+            down = y < sim_settings.generic.grid_size[1]
+            left = x > 0
+            node_column.append(Node((up, right, down, left)))
         nodes.append(node_column)
 
     return grid, objects, nodes

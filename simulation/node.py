@@ -4,9 +4,9 @@ from pygame import Vector2
 from typing import assert_never
 
 class Direction(Enum):
-    Up = 0,
-    Right = 1,
-    Down = 2,
+    Up = 0
+    Right = 1
+    Down = 2
     Left = 3
 
     def to_vector(self) -> Vector2:
@@ -28,7 +28,7 @@ class Node:
         # neighbor order: top, right, bottom, left
         self.has_neighbor: np.ndarray = np.array(neighborhood)
         TMP_NUM_COLONIES = 1 # TODO set it in simulation_settings
-        self.pheromones: PerColony[(Intensity, Intensity, Intensity, Intensity)] = [
+        self.pheromones: PerColony[np.ndarray] = [
             np.zeros(4) for _ in range(TMP_NUM_COLONIES)
         ]
         TMP_CAPACITY = 1 # TODO how to determine?
