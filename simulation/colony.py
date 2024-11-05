@@ -18,10 +18,8 @@ class Colony:
         self.ants: list[Ant] = []
 
     def step(self, grid: np.ndarray, objects: np.ndarray, nodes: list[list[Node]]):
-        # TEMP: keep one ant alive
-        assert len(self.ants) <= 1
         assert len(self.foods) == 1
-        if len(self.ants) == 0:
+        while len(self.ants) < 2:
             self.ants.append(
                 Ant(
                     position=Vector2(self.pos.x, self.pos.y),
