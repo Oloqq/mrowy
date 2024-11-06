@@ -17,7 +17,7 @@ class GenericSimulationSettings:
 
     grid_size: tuple[int, int] = (100, 100)
     time_step: TimeStep = TimeStep.HOURLY
-    tile_size: int = 1
+    tile_size: int = 5
     duration: int = 1000
 
 

@@ -1,12 +1,12 @@
 from simulation.simulation import PygameSimulation
 from constants.enums import FieldType, ObjectType, DayPart, Sex
-
 import pygame as pg
+
 
 class FoxRenderer(PygameSimulation.IRenderer):
     def draw_text(self, sim: PygameSimulation):
         font = pg.font.SysFont("Arial", 20)
-        text = font.render("lecymy duuuur", True, (255, 255, 255))
+        text = font.render("lecymy duuuur", True, (255, 0, 0))
         sim.screen.blit(text, (10, 10))
 
     def draw_tile(self, sim: PygameSimulation):
@@ -23,9 +23,10 @@ class FoxRenderer(PygameSimulation.IRenderer):
             sim.objects[x, y] = sim.selected_tile_type
 
     def draw_grid(self, sim: PygameSimulation):
+        print(sim.grid.shape)
         for x in range(sim.sim_settings.generic.grid_size[0]):
             for y in range(sim.sim_settings.generic.grid_size[1]):
-                pg.draw.rect(sim.screen, sim.display_settings.field_colors[sim.grid[x, y]],
+                pg.draw.rect(sim.screen, sim.display_settings.field_colors[sim.grid[y, x]],
                                 pg.Rect(x * sim.display_settings.TILE_SIZE, y * sim.display_settings.TILE_SIZE,
                                         sim.display_settings.TILE_SIZE, sim.display_settings.TILE_SIZE), 0)
 

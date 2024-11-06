@@ -22,5 +22,5 @@ def start_ant():
     sim.run()
 
 if __name__ == "__main__":
-    start_fox()
-    # start_ant()
+    # start_fox()
+    start_ant()

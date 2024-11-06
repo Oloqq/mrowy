@@ -36,7 +36,7 @@ class PygameSimulation:
         self.grid, self.objects = initialize.grid_and_objects(save_name, sim_settings)
 
         # app state
-        self.selected_tile_type: FieldType | ObjectType = FieldType.FOREST
+        self.selected_tile_type: FieldType | ObjectType = FieldType.GRASS
         self.done = False
         self.paused = False
         self.debug = False

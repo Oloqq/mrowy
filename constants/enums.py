@@ -21,9 +21,8 @@ class Sex(int, Enum):
 
 class FieldType(Enum):
     GRASS = 0
-    FOREST = 1
-    WATER = 2
-    URBAN = 3
+    PATH = 1
+    BUILDINGS = 2
 
 
 class ObjectType(Enum):
