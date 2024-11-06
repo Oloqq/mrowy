@@ -7,6 +7,8 @@ import pygame as pg
 class DisplaySettings:
     TILE_SIZE = 20
     field_colors = {
+        FieldType.PATH: (255, 191, 0),
+        FieldType.BUILDINGS: (0, 0, 0),
         FieldType.GRASS: (0, 255, 0),
         FieldType.FOREST: (0, 100, 0),
         FieldType.WATER: (0, 0, 255),
@@ -15,5 +17,7 @@ class DisplaySettings:
     ant_image = pg.image.load("assets/ant.png")
     colony_image = pg.image.load("assets/colony.png")
     food_image = pg.image.load("assets/food.png")
-    GRID_WIDTH = 30
-    GRID_HEIGHT = 50
+    GRID_WIDTH_OLD = 30
+    GRID_HEIGHT_OLD = 50
+    GRID_WIDTH_NEW = 273
+    GRID_HEIGHT_NEW = 47

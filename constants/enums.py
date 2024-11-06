@@ -24,6 +24,8 @@ class FieldType(Enum):
     FOREST = 1
     WATER = 2
     URBAN = 3
+    PATH = 4
+    BUILDINGS = 5
 
 
 class ObjectType(Enum):

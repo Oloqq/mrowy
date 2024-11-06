@@ -12,12 +12,16 @@ class GenericSimulationSettings:
         tile_size: The size of a single tile in the grid in meters.
         time_step: The time step of the simulation.
         duration: The duration of the simulation in time steps.
+        map_image_path: The path to the image file used to generate the grid.
     """
-
     grid_size: tuple[int, int] = (100, 100)
     time_step: TimeStep = TimeStep.HOURLY
-    tile_size: int = 1
+    tile_size: int = 5
     duration: int = 1000
+    map_image_path: str = "../assets/mapav4.png"
+    create_grid_from_img: bool = True
+
+
 
 @dataclass
 class SimulationSettings:
