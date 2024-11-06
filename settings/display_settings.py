@@ -5,7 +5,7 @@ import pygame as pg
 
 @dataclass
 class DisplaySettings:
-    TILE_SIZE = 20
+    TILE_SIZE = 7
     field_colors = {
         FieldType.PATH: (255, 191, 0),
         FieldType.BUILDINGS: (0, 0, 0),

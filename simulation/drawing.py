@@ -26,7 +26,7 @@ class AntRenderer(PygameSimulation.IRenderer):
         print(sim.grid.shape)
         for x in range(sim.sim_settings.generic.grid_size[0]):
             for y in range(sim.sim_settings.generic.grid_size[1]):
-                pg.draw.rect(sim.screen, sim.display_settings.field_colors[sim.grid[x, y]],
+                pg.draw.rect(sim.screen, sim.display_settings.field_colors[sim.grid[y, x]],
                                 pg.Rect(x * sim.display_settings.TILE_SIZE, y * sim.display_settings.TILE_SIZE,
                                         sim.display_settings.TILE_SIZE, sim.display_settings.TILE_SIZE), 0)
 
