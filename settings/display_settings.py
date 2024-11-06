@@ -5,7 +5,7 @@ import pygame as pg
 
 @dataclass
 class DisplaySettings:
-    TILE_SIZE = 20
+    TILE_SIZE = 7
     field_colors = {
         FieldType.PATH: (255, 191, 0),
         FieldType.BUILDINGS: (0, 0, 0),
@@ -17,7 +17,12 @@ class DisplaySettings:
     ant_image = pg.image.load("assets/ant.png")
     colony_image = pg.image.load("assets/colony.png")
     food_image = pg.image.load("assets/food.png")
+    # read frid from ant.npz
     GRID_WIDTH_OLD = 30
     GRID_HEIGHT_OLD = 50
+
+    # new map
     GRID_WIDTH_NEW = 273
     GRID_HEIGHT_NEW = 47
+
+    

@@ -25,7 +25,7 @@ def create_grid(sim_settings: SimulationSettings):
         grid = mapImageToFieldType(img_array)
     else:
         print("Created new grid")
-        grid = np.full((sim_settings.generic.grid_size[1], sim_settings.generic.grid_size[0]), FieldType.GRASS, dtype=FieldType)
+        grid = np.full(sim_settings.generic.grid_size, FieldType.GRASS, dtype=FieldType)
     return grid
 
 def grid_and_objects(save_name: str, sim_settings: SimulationSettings) -> tuple[np.ndarray, np.ndarray, list[list[Node]]]:
@@ -97,4 +97,4 @@ def mapImageToFieldType(image: np.ndarray):
                 raise ValueError(f"Unknown color at {i}, {j}: {image[i, j]}")
     print(f"Grass: {g}, Path: {p}, Buildings: {b}")
 
-    return mappedImage
+    return mappedImage.transpose() # numpy uses height first

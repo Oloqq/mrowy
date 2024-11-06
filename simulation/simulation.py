@@ -19,14 +19,13 @@ class PygameSimulation:
         def draw_tile(sim: "PygameSimulation"):
             raise NotImplementedError
 
-    def __init__(self, save_name: str, renderer: IRenderer, sim_settings: SimulationSettings, display_settings: DisplaySettings, create_grid_from_img: bool = False):
+    def __init__(self, save_name: str, renderer: IRenderer, sim_settings: SimulationSettings, display_settings: DisplaySettings):
         self.save_name = save_name
         self.sim_settings: SimulationSettings = sim_settings
         self.display_settings: DisplaySettings = display_settings
         old_grid_size = (self.display_settings.GRID_WIDTH_OLD, self.display_settings.GRID_HEIGHT_OLD)
         new_grid_size = (self.display_settings.GRID_WIDTH_NEW, self.display_settings.GRID_HEIGHT_NEW)
-        self.sim_settings.generic.grid_size = new_grid_size if create_grid_from_img else old_grid_size
-        self.sim_settings.generic.create_grid_from_img = create_grid_from_img
+        self.sim_settings.generic.grid_size = new_grid_size if sim_settings.generic.create_grid_from_img else old_grid_size
 
         # display
         pg.init()

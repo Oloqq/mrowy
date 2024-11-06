@@ -18,7 +18,7 @@ class GenericSimulationSettings:
     time_step: TimeStep = TimeStep.HOURLY
     tile_size: int = 5
     duration: int = 1000
-    map_image_path: str = "../assets/mapav4.png"
+    map_image_path: str = "assets/mapav4.png"
     create_grid_from_img: bool = True
 
 
