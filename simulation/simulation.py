@@ -26,11 +26,12 @@ class PygameSimulation:
         old_grid_size = (self.display_settings.GRID_WIDTH_OLD, self.display_settings.GRID_HEIGHT_OLD)
         new_grid_size = (self.display_settings.GRID_WIDTH_NEW, self.display_settings.GRID_HEIGHT_NEW)
         self.sim_settings.generic.grid_size = new_grid_size if sim_settings.generic.create_grid_from_img else old_grid_size
-
+        self.sim_settings.generic.tile_size = self.display_settings.TILE_SIZE_NEW if sim_settings.generic.create_grid_from_img else self.display_settings.TILE_SIZE_OLD
+        
         # display
         pg.init()
         self.renderer = renderer
-        self.screen = initialize.window(sim_settings, display_settings)
+        self.screen = initialize.window(sim_settings)
         self.grid, self.objects, self.nodes = initialize.grid_and_objects(save_name, sim_settings)
 
         # app state

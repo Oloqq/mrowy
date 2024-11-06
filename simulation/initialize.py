@@ -70,9 +70,9 @@ def grid_and_objects(save_name: str, sim_settings: SimulationSettings) -> tuple[
 
     return grid, objects, nodes
 
-def window(sim_settings: SimulationSettings, display_settings: DisplaySettings):
-    window_size = (display_settings.TILE_SIZE * sim_settings.generic.grid_size[0],
-                    display_settings.TILE_SIZE * sim_settings.generic.grid_size[1])
+def window(sim_settings: SimulationSettings):
+    window_size = (sim_settings.generic.tile_size * sim_settings.generic.grid_size[0],
+                    sim_settings.generic.tile_size * sim_settings.generic.grid_size[1])
     return pg.display.set_mode(window_size)
 
 
