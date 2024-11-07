@@ -23,38 +23,40 @@ class AntRenderer(PygameSimulation.IRenderer):
             sim.objects[x, y] = sim.selected_tile_type
 
     def draw_grid(self, sim: PygameSimulation):
-        print(sim.grid.shape)
-        for x in range(sim.sim_settings.generic.grid_size[0]):
-            for y in range(sim.sim_settings.generic.grid_size[1]):
+        for x in range(sim.grid.shape[0]):
+            for y in range(sim.grid.shape[1]):
                 pg.draw.rect(sim.screen, sim.display_settings.field_colors[sim.grid[x, y]],
                                 pg.Rect(x * sim.sim_settings.generic.tile_size, y * sim.sim_settings.generic.tile_size,
                                         sim.sim_settings.generic.tile_size, sim.sim_settings.generic.tile_size), 0)
 
-    def draw_colonies(self, sim: PygameSimulation):
-        for colony in sim.colonies:
-            cx, cy = colony.pos
-            scaled = pg.transform.scale(sim.display_settings.colony_image,
-                (sim.sim_settings.generic.tile_size,
-                    sim.sim_settings.generic.tile_size))
-            sim.screen.blit(scaled, (cx * sim.sim_settings.generic.tile_size, cy * sim.sim_settings.generic.tile_size))
-            for ant in colony.ants:
-                ax, ay = ant.pos
-                scaled = pg.transform.scale(sim.display_settings.ant_image,
-                    (sim.sim_settings.generic.tile_size,
-                    sim.sim_settings.generic.tile_size))
-                sim.screen.blit(scaled, (ax * sim.sim_settings.generic.tile_size, ay * sim.sim_settings.generic.tile_size))
-            for food in colony.foods:
-                fx, fy = food
-                scaled = pg.transform.scale(sim.display_settings.food_image,
-                (sim.sim_settings.generic.tile_size,
-                 sim.sim_settings.generic.tile_size))
-                sim.screen.blit(scaled, (fx * sim.sim_settings.generic.tile_size, fy * sim.sim_settings.generic.tile_size))
+    def draw_population(self, sim: PygameSimulation):
+        population = sim.population
+        for ant in population.ants:
+            if ant.source != (7, 7) and ant.destination != (7, 7):
+                continue
+
+            ax, ay = ant.pos
+            tile = sim.sim_settings.generic.tile_size
+            rect_size = tile // 4
+            offset = rect_size
+            r = pg.rect.Rect(ax * tile + offset, ay * tile + offset, rect_size, rect_size)
+            pg.draw.rect(sim.screen, ant.color, r)
+            # scaled = pg.transform.scale(sim.display_settings.ant_image,
+            #     (sim.sim_settings.generic.tile_size,
+            #     sim.sim_settings.generic.tile_size))
+            # sim.screen.blit(scaled, (ax * sim.sim_settings.generic.tile_size, ay * sim.sim_settings.generic.tile_size))
+        for food in population.foods:
+            fx, fy = food
+            scaled = pg.transform.scale(sim.display_settings.food_image,
+            (sim.sim_settings.generic.tile_size,
+                sim.sim_settings.generic.tile_size))
+            sim.screen.blit(scaled, (fx * sim.sim_settings.generic.tile_size, fy * sim.sim_settings.generic.tile_size))
 
     def draw_pheromones(self, sim: PygameSimulation):
-        TMP_PHEROMONE_FLAVOR = 0 # TODO switch between flavors
+        TMP_PHEROMONE_FLAVOR = (7, 7) # TODO switch between flavors
         for x in range(sim.sim_settings.generic.grid_size[0]):
             for y in range(sim.sim_settings.generic.grid_size[1]):
-                color = (int(255 * sim.nodes[x][y].mean_intensity(TMP_PHEROMONE_FLAVOR)), 0, 0)
+                color = (int(255 * sim.nodes[x][y].mean_intensity(TMP_PHEROMONE_FLAVOR, x, y, sim.nodes)), 0, 0)
                 pg.draw.rect(
                     sim.screen,
                     color,
@@ -71,5 +73,6 @@ class AntRenderer(PygameSimulation.IRenderer):
         self.draw_grid(sim)
         if sim.show_pheromones:
             self.draw_pheromones(sim)
-        self.draw_colonies(sim)
+        if sim.show_ants:
+            self.draw_population(sim)
         self.draw_text(sim)

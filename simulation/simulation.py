@@ -3,13 +3,12 @@ from settings.display_settings import DisplaySettings
 from constants.enums import FieldType, ObjectType, DayPart, Sex
 
 from simulation import initialize
-from simulation.colony import Colony
+from simulation.population import Population
 
 import pygame as pg
 import numpy as np
-from pygame import Vector2
 
-MAX_FPS = 10
+MAX_FPS = 60
 
 class PygameSimulation:
     class IRenderer:
@@ -27,12 +26,14 @@ class PygameSimulation:
         new_grid_size = (self.display_settings.GRID_WIDTH_NEW, self.display_settings.GRID_HEIGHT_NEW)
         self.sim_settings.generic.grid_size = new_grid_size if sim_settings.generic.create_grid_from_img else old_grid_size
         self.sim_settings.generic.tile_size = self.display_settings.TILE_SIZE_NEW if sim_settings.generic.create_grid_from_img else self.display_settings.TILE_SIZE_OLD
-        
+
         # display
         pg.init()
         self.renderer = renderer
         self.screen = initialize.window(sim_settings)
         self.grid, self.objects, self.nodes = initialize.grid_and_objects(save_name, sim_settings)
+        self.show_pheromones = True
+        self.show_ants = True
 
         # app state
         self.selected_tile_type: FieldType | ObjectType = FieldType.GRASS
@@ -41,11 +42,13 @@ class PygameSimulation:
         self.debug = False
         self.step_by_step = True
         self.step_requested = False
-        self.show_pheromones = True
+
 
         # simulation logic
-        foods1 = [Vector2(0, 10)]
-        self.colonies: list[Colony] = [Colony(Vector2(0, 2), foods1)]
+        # self.trips = [ # use for displaying paths
+        #     ((0, 2), (0, 10))
+        # ]
+        self.population: Population = Population()
 
     def run(self):
         clock = pg.time.Clock()
@@ -56,8 +59,7 @@ class PygameSimulation:
             need_to_step = self.step_by_step and self.step_requested
             if not self.paused or need_to_step:
                 self.step_requested = False
-                for colony in self.colonies:
-                    colony.step(self.grid, self.objects, self.nodes)
+                self.population.step(self.grid, self.objects, self.nodes)
 
             self.screen.fill((255, 255, 255))
             self.renderer.draw(self)
@@ -104,6 +106,8 @@ class PygameSimulation:
                     self.step_by_step = not self.step_by_step
                 elif event.key == pg.K_f:
                     self.show_pheromones = not self.show_pheromones
+                elif event.key == pg.K_a:
+                    self.show_ants = not self.show_ants
         if pg.mouse.get_pressed()[0]:
             if self.paused:
                 # TODO nodes have to be updated as well

@@ -32,7 +32,7 @@ def grid_and_objects(save_name: str, sim_settings: SimulationSettings) -> tuple[
     grid: np.ndarray
     nodes: list[list[Node]] = []
     objects = None
-        
+
     if os.path.exists(save_name) and not sim_settings.generic.create_grid_from_img:
         loaded_data = np.load(save_name, allow_pickle=True)
         loaded_grid = loaded_data['grid']
@@ -59,9 +59,8 @@ def grid_and_objects(save_name: str, sim_settings: SimulationSettings) -> tuple[
             # TODO check tile kind
             up = y > 0 and grid[x][y-1] != FieldType.BUILDINGS
             # right = x < sim_settings.generic.grid_size[0]
-            # down = y < sim_settings.generic.grid_size[1] # FIXME sim_settings grid size does not match reality (those lines casue index error)
-            right = x < 5 and grid[x+1][y] != FieldType.BUILDINGS
-            # print(down)
+            # down = y < sim_settings.generic.grid_size[1] # TODO use the whole map
+            right = x < 15 and grid[x+1][y] != FieldType.BUILDINGS
             down = y < 15 and grid[x][y+1] != FieldType.BUILDINGS
             left = x > 0 and grid[x-1][y] != FieldType.BUILDINGS
 
