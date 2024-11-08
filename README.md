@@ -38,3 +38,10 @@ Następnie aby uruchomić symulcję należy kliknąć klawisz "space" na klawiat
 
 ### Widok feromonów:
 Aby wyświetlić widok feromonów należy kliknąć klawisz "f" na klawiaturze. Widok ten pozwala na zobaczenie śladu feromonowego pozostawionego przez mrówki.
+
+## Mapa kampusu AGH:
+Mapa kampusu AGH została stworzona na podstawie zdjęcia satelitarnego. Na mapie znajdują się budynki, trawniki oraz ścieżki, po których będą przemieszczać się studenci.
+
+Akualnie algorytm, ze względów opymalizacyjnych, działa jedynie na mapach o mniejszych rozmiarach.
+
+Docelowa mapa znajduję się w folderze "assets" w pliku "mapav4.png"
