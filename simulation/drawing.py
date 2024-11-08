@@ -55,7 +55,7 @@ class AntRenderer(PygameSimulation.IRenderer):
         #     sim.screen.blit(scaled, (fx * sim.sim_settings.generic.tile_size, fy * sim.sim_settings.generic.tile_size))
 
     def draw_pheromones(self, sim: PygameSimulation):
-        TMP_PHEROMONE_FLAVOR = sim.sim_settings.generic.target # TODO switch between flavors
+        TMP_PHEROMONE_FLAVOR = sim.sim_settings.generic.source # TODO switch between flavors
         for x in range(sim.sim_settings.generic.grid_size[0]):
             for y in range(sim.sim_settings.generic.grid_size[1]):
                 color = (int(255 * sim.nodes[x][y].mean_intensity(TMP_PHEROMONE_FLAVOR, x, y, sim.nodes)), 0, 0)
