@@ -1,6 +1,6 @@
 from constants.enums import DistributionType, TimeStep, Sex
 from dataclasses import dataclass, field
-
+from simulation.ant import Coords
 
 @dataclass
 class GenericSimulationSettings:
@@ -20,6 +20,23 @@ class GenericSimulationSettings:
     duration: int = 1000
     map_image_path: str = "assets/mapav4.png"
     create_grid_from_img: bool = True
+    target: Coords = (6, 31)
+    source: Coords = (6, 15)
+
+@dataclass
+class PopulationSettings:
+    """
+    Simulation metadata and other implementation details.
+
+    Attributes:
+        spawn_interval: The interval at which new ants are spawned.
+        time_to_spawn: The time remaining until the next spawn.
+
+    """
+    spawn_interval: int = 30
+    time_to_spawn: int = 0
+
+
 
 
 
@@ -32,6 +49,7 @@ class SimulationSettings:
         generic: Simulation parameters related to implementation details.
     """
     generic: GenericSimulationSettings
+    population: PopulationSettings
 
 
 def get_default_simulation_settings() -> SimulationSettings:
@@ -43,4 +61,5 @@ def get_default_simulation_settings() -> SimulationSettings:
     """
     return SimulationSettings(
         generic=GenericSimulationSettings(),
+        population=PopulationSettings(),
     )

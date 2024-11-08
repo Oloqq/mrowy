@@ -1,14 +1,16 @@
 from simulation.ant import Ant
 from simulation.node import Node
+from settings.simulation_settings import SimulationSettings
 
 from pygame import Vector2
 import numpy as np
 import random
 
 class Population:
-    def __init__(self):
-        self.spawn_interval = 30 # TODO settings
-        self.time_to_spawn = 0
+    def __init__(self, sim_settings: SimulationSettings):
+        self.sim_settings = sim_settings
+        self.spawn_interval = sim_settings.population.spawn_interval
+        self.time_to_spawn = sim_settings.population.spawn_interval
         self.ants: list[Ant] = []
         self.foods = [Vector2(7, 7)] # just visual, to be removed
 
@@ -23,21 +25,21 @@ class Population:
             self.time_to_spawn = self.spawn_interval
             print("next generation")
 
-            for _ in range(5):
+            for _ in range(10):
                 self.ants.append(
                     Ant(
-                        position=(7, 7),
-                        destination=(random.randint(0, 14), random.randint(0, 14)),
+                        position=self.sim_settings.generic.source,
+                        destination=self.sim_settings.generic.target,
                     )
                 )
 
-            for _ in range(3):
-                self.ants.append(
-                    Ant(
-                        position=(random.randint(0, 14), random.randint(0, 14)),
-                        destination=(7, 7),
-                    )
-                )
+            # for _ in range(3):
+            #     self.ants.append(
+            #         Ant(
+            #             position=(random.randint(0, 14), random.randint(0, 14)),
+            #             destination=(7, 7),
+            #         )
+            #     )
 
             # TEMP restriction, also in initialize.grid
             # for x in range(15):

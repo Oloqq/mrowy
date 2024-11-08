@@ -42,13 +42,15 @@ class PygameSimulation:
         self.debug = False
         self.step_by_step = True
         self.step_requested = False
+        self.target: tuple[int, int] = None
+        self.source: tuple[int, int] = None
 
 
         # simulation logic
         # self.trips = [ # use for displaying paths
         #     ((0, 2), (0, 10))
         # ]
-        self.population: Population = Population()
+        self.population: Population = Population(sim_settings)
 
     def run(self):
         clock = pg.time.Clock()
@@ -66,6 +68,25 @@ class PygameSimulation:
 
             pg.display.flip()
 
+    def set_target(self, target):
+        self.target = target
+        self.sim_settings.generic.target = target
+        print("Target set to: ", target)
+
+    def set_source(self, source):
+        self.source = source
+        self.sim_settings.generic.source = source
+        print("Source set to: ", source)
+
+    def isTargetAndSourceSetCheck(self) -> bool:
+        return self.target is not None and self.source is not None     
+
+    def toggle_pause(self):
+        if self.isTargetAndSourceSetCheck():
+            self.paused = not self.paused
+        else:
+            print("Set target and source: press 't' to set target and 's' to set source")
+
     def handle_events(self):
         for event in pg.event.get():
             if event.type == pg.QUIT:
@@ -74,10 +95,16 @@ class PygameSimulation:
                 if event.key == pg.K_ESCAPE:
                     self.done = True
                 elif event.key == pg.K_SPACE:
-                    self.paused = not self.paused
+                    self.toggle_pause()
                 elif event.key == pg.K_TAB:
                     if self.step_by_step:
                         self.step_requested = True
+                elif event.key == pg.K_t:
+                    print("Selected target")
+                    self.selected_tile_type = ObjectType.TARGET
+                elif event.key == pg.K_s:
+                    print("Selected source")
+                    self.selected_tile_type = ObjectType.SOURCE
                 elif event.key == pg.K_1:
                     self.selected_tile_type = FieldType.GRASS
                     print("Selected grass")
@@ -87,18 +114,6 @@ class PygameSimulation:
                 elif event.key == pg.K_3:
                     self.selected_tile_type = FieldType.WATER
                     print("Selected water")
-                elif event.key == pg.K_5:
-                    self.selected_tile_type = ObjectType.HUNTER
-                    print("Selected hunter")
-                elif event.key == pg.K_6:
-                    self.selected_tile_type = ObjectType.FOX_DEN
-                    print("Selected fox den")
-                elif event.key == pg.K_7:
-                    self.selected_tile_type = ObjectType.RABBIT_DEN
-                    print("Selected rabbit den")
-                elif event.key == pg.K_8:
-                    self.selected_tile_type = ObjectType.NOTHING
-                    print("Selected object eraser")
                 elif event.key == pg.K_s:
                     np.savez(self.save_name, grid=self.grid, objects=self.objects)
                     print("Saved grid to file")
@@ -111,6 +126,10 @@ class PygameSimulation:
         if pg.mouse.get_pressed()[0]:
             if self.paused:
                 # TODO nodes have to be updated as well
-                self.renderer.draw_tile(self)
+                x, y = self.renderer.draw_tile(self)
+                if self.selected_tile_type == ObjectType.TARGET:
+                    self.set_target((x, y))
+                elif self.selected_tile_type == ObjectType.SOURCE:
+                    self.set_source((x, y))
             else:
                 print("Draw mode is off. To enable it, press space.")

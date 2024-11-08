@@ -36,13 +36,16 @@ PerColony = list
 Intensity = float
 
 class Node:
-    def __init__(self, neighborhood: tuple[bool, bool, bool, bool]):
+    def __init__(self, available_fields: np.ndarray, neighborhood: tuple[bool, bool, bool, bool]):
         # neighbor order: top, right, bottom, left
         self.has_neighbor: np.ndarray = np.array(neighborhood)
         self.pheromones: dict[Coords, np.ndarray] = {}
-        for x in range(15): # TEMP
-            for y in range(15):
-                self.pheromones[(x, y)] = np.zeros(4)
+
+        # TODO: remove this and use Grid 
+        for x in range(available_fields.shape[0]):
+            for y in range(available_fields.shape[1]):
+                if available_fields[x][y]:
+                    self.pheromones[(x, y)] = np.zeros(4)
 
         TMP_CAPACITY = 1 # TODO how to determine?
         self.capacity = TMP_CAPACITY
