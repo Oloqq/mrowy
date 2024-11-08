@@ -32,7 +32,7 @@ class PygameSimulation:
         self.renderer = renderer
         self.screen = initialize.window(sim_settings)
         self.grid, self.objects, self.nodes = initialize.grid_and_objects(save_name, sim_settings)
-        self.show_pheromones = True
+        self.show_pheromones = False
         self.show_ants = True
 
         # app state
