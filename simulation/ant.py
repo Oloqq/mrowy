@@ -11,29 +11,36 @@ class Ant:
         self.age = 0
         self.ready_to_die = False
         # self.color = (random.randint(60, 255), random.randint(60, 255), random.randint(60, 255))
-        self.color = (0, 0, 0)
-        if self.source == (7, 7):
-            self.color = (255, 0, 0)
-        elif self.destination == (7, 7):
-            self.color = (0, 0, 255)
+        # self.color = (0, 0, 0)
+        # if self.source == (7, 7):
+        self.color = (255, 0, 0)
+        # elif self.destination == (7, 7):
+        #     self.color = (0, 0, 255)
 
     def choose_step_direction(self, from_node: Node, nodes: list[list[Node]], current_x: int, current_y: int) -> Direction:
         TMP_EXPLORATION_CHANCE = 0.3 # TODO simulation settings
         # if random.random() < TMP_EXPLORATION_CHANCE and self.destination != (7, 7):
-        if random.random() < TMP_EXPLORATION_CHANCE:
-            return self.explore()
+        if random.random() < TMP_EXPLORATION_CHANCE and self.destination != self.source:
+            return self.explore(nodes)
         else:
             relevant_smells = from_node.pheromones[self.destination] * from_node.has_neighbor
             # edge case of initial exploration when all pheromones are 0
             if (relevant_smells == 0).all():
-                return self.explore()
-            if self.destination == (7, 7):
+                return self.explore(nodes)
+            if self.destination == self.source:
                 print("not exploring")
             return Direction(relevant_smells.argmax())
 
 
-    def explore(self):
-        return random.choice(list(Direction))
+    def explore(self, nodes: list[list[Node]]) -> Direction:
+        x, y = self.pos
+        limit = 20
+
+        random_direction = random.choice(list(Direction))
+        while not nodes[x][y].has_neighbor[random_direction.value] and limit > 0:
+            random_direction = random.choice(list(Direction))
+            limit -= 1
+        return random_direction
 
     def step(self, grid: np.ndarray, objects: np.ndarray, nodes: list[list[Node]]):
         self.age += 1

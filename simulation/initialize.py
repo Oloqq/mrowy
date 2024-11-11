@@ -53,18 +53,20 @@ def grid_and_objects(save_name: str, sim_settings: SimulationSettings) -> tuple[
     else:
         grid = create_grid(sim_settings)
 
+    available_fields = np.isin(grid, [FieldType.GRASS, FieldType.FOREST, FieldType.PATH])
+
+    print("available fields: ", available_fields.shape)
+    print(available_fields)
+    
     for x, column in enumerate(grid):
         node_column = []
         for y, val in enumerate(column):
-            # TODO check tile kind
-            up = y > 0 and grid[x][y-1] != FieldType.BUILDINGS
-            # right = x < sim_settings.generic.grid_size[0]
-            # down = y < sim_settings.generic.grid_size[1] # TODO use the whole map
-            right = x < 15 and grid[x+1][y] != FieldType.BUILDINGS
-            down = y < 15 and grid[x][y+1] != FieldType.BUILDINGS
-            left = x > 0 and grid[x-1][y] != FieldType.BUILDINGS
+            up = y > 0 and available_fields[x][y-1] 
+            right = x < sim_settings.generic.grid_size[0]-1 and available_fields[x+1][y]
+            down = y < sim_settings.generic.grid_size[1]-1 and available_fields[x][y+1]
+            left = x > 0 and available_fields[x-1][y]
 
-            node_column.append(Node((up, right, down, left)))
+            node_column.append(Node(available_fields, (up, right, down, left)))
         nodes.append(node_column)
 
     return grid, objects, nodes

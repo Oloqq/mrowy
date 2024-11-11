@@ -31,9 +31,8 @@ class FieldType(Enum):
 class ObjectType(Enum):
     NOTHING = 0
     HUNTER = 1
-    FOX_DEN = 2
-    RABBIT_DEN = 3
-
+    SOURCE = 2
+    TARGET = 3
 
 class DayPart(Enum):
     NIGHT = 0
