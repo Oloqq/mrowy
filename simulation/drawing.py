@@ -1,7 +1,7 @@
 from simulation.simulation import PygameSimulation
-from simulation.node import Node
-from constants.enums import FieldType, ObjectType, DayPart, Sex
+from constants.enums import FieldType
 import pygame as pg
+
 
 class AntRenderer(PygameSimulation.IRenderer):
     def draw_text(self, sim: PygameSimulation):
@@ -28,8 +28,8 @@ class AntRenderer(PygameSimulation.IRenderer):
         for x in range(sim.grid.shape[0]):
             for y in range(sim.grid.shape[1]):
                 pg.draw.rect(sim.screen, sim.display_settings.field_colors[sim.grid[x, y]],
-                                pg.Rect(x * sim.sim_settings.generic.tile_size, y * sim.sim_settings.generic.tile_size,
-                                        sim.sim_settings.generic.tile_size, sim.sim_settings.generic.tile_size), 0)
+                             pg.Rect(x * sim.sim_settings.generic.tile_size, y * sim.sim_settings.generic.tile_size,
+                                     sim.sim_settings.generic.tile_size, sim.sim_settings.generic.tile_size), 0)
 
     def draw_population(self, sim: PygameSimulation):
         population = sim.population
@@ -44,8 +44,8 @@ class AntRenderer(PygameSimulation.IRenderer):
             r = pg.rect.Rect(ax * tile + offset, ay * tile + offset, rect_size, rect_size)
             pg.draw.rect(sim.screen, ant.color, r)
             scaled = pg.transform.scale(sim.display_settings.ant_image,
-                (sim.sim_settings.generic.tile_size,
-                sim.sim_settings.generic.tile_size))
+                                        (sim.sim_settings.generic.tile_size,
+                                         sim.sim_settings.generic.tile_size))
             sim.screen.blit(scaled, (ax * sim.sim_settings.generic.tile_size, ay * sim.sim_settings.generic.tile_size))
         # for food in population.foods:
         #     fx, fy = food
@@ -55,33 +55,47 @@ class AntRenderer(PygameSimulation.IRenderer):
         #     sim.screen.blit(scaled, (fx * sim.sim_settings.generic.tile_size, fy * sim.sim_settings.generic.tile_size))
 
     def draw_pheromones(self, sim: PygameSimulation):
-        TMP_PHEROMONE_FLAVOR = sim.sim_settings.generic.source # TODO switch between flavors
+        TMP_PHEROMONE_FLAVOR = sim.sim_settings.generic.source  # TODO: switch between flavors
+
+        # Create a surface for pheromones with transparency
+        pheromone_surface = pg.Surface(
+            (sim.sim_settings.generic.grid_size[0] * sim.sim_settings.generic.tile_size,
+             sim.sim_settings.generic.grid_size[1] * sim.sim_settings.generic.tile_size),
+            flags=pg.SRCALPHA
+        )
+
         for x in range(sim.sim_settings.generic.grid_size[0]):
             for y in range(sim.sim_settings.generic.grid_size[1]):
-                color = (int(255 * sim.nodes[x][y].mean_intensity(TMP_PHEROMONE_FLAVOR, x, y, sim.nodes)), 0, 0)
+                intensity = sim.nodes[x][y].mean_intensity(TMP_PHEROMONE_FLAVOR, x, y, sim.nodes)
+                color = (255, 0, 0, int(150 * intensity))
+                tile_size = sim.sim_settings.generic.tile_size
+
                 pg.draw.rect(
-                    sim.screen,
+                    pheromone_surface,
                     color,
                     pg.Rect(
-                        x * sim.sim_settings.generic.tile_size,
-                        y * sim.sim_settings.generic.tile_size,
-                        sim.sim_settings.generic.tile_size,
-                        sim.sim_settings.generic.tile_size
+                        x * tile_size,
+                        y * tile_size,
+                        tile_size,
+                        tile_size
                     ),
-                0)
+                    0
+                )
+
+        sim.screen.blit(pheromone_surface, (0, 0))
 
     def draw_source_and_target(self, sim: PygameSimulation):
         if sim.source is not None:
             sx, sy = sim.source
             scaled = pg.transform.scale(sim.display_settings.colony_image,
-            (sim.sim_settings.generic.tile_size,
-                sim.sim_settings.generic.tile_size))
+                                        (sim.sim_settings.generic.tile_size,
+                                         sim.sim_settings.generic.tile_size))
             sim.screen.blit(scaled, (sx * sim.sim_settings.generic.tile_size, sy * sim.sim_settings.generic.tile_size))
         if sim.target is not None:
             tx, ty = sim.target
             scaled = pg.transform.scale(sim.display_settings.food_image,
-            (sim.sim_settings.generic.tile_size,
-                sim.sim_settings.generic.tile_size))
+                                        (sim.sim_settings.generic.tile_size,
+                                         sim.sim_settings.generic.tile_size))
             sim.screen.blit(scaled, (tx * sim.sim_settings.generic.tile_size, ty * sim.sim_settings.generic.tile_size))
 
     def draw(self, sim: PygameSimulation):

@@ -8,17 +8,6 @@ class TimeStep(int, Enum):
     DAY_PART = 4
 
 
-class DistributionType(int, Enum):
-    UNIFORM = 1
-    NORMAL = 2
-    EXPONENTIAL = 3
-
-
-class Sex(int, Enum):
-    MALE = 1
-    FEMALE = 2
-
-
 class FieldType(Enum):
     GRASS = 0
     FOREST = 1
@@ -33,9 +22,3 @@ class ObjectType(Enum):
     HUNTER = 1
     SOURCE = 2
     TARGET = 3
-
-class DayPart(Enum):
-    NIGHT = 0
-    DAY = 1
-    DAWN = 2
-    DUSK = 3

@@ -1,5 +1,5 @@
-from constants.enums import DistributionType, TimeStep, Sex
-from dataclasses import dataclass, field
+from constants.enums import TimeStep
+from dataclasses import dataclass
 from simulation.ant import Coords
 
 @dataclass
@@ -22,6 +22,9 @@ class GenericSimulationSettings:
     create_grid_from_img: bool = True
     target: Coords = (6, 31)
     source: Coords = (6, 15)
+    # TODO find optimal settings
+    node_capacity = 1
+    node_max_smell = 4
 
 @dataclass
 class PopulationSettings:

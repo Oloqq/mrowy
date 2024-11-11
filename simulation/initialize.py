@@ -1,6 +1,6 @@
 from settings.simulation_settings import SimulationSettings
 from settings.display_settings import DisplaySettings
-from constants.enums import FieldType, ObjectType
+from constants.enums import FieldType
 from simulation.node import Node
 from PIL import Image
 
