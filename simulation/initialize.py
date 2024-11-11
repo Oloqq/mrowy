@@ -66,7 +66,7 @@ def grid_and_objects(save_name: str, sim_settings: SimulationSettings) -> tuple[
             down = y < sim_settings.generic.grid_size[1]-1 and available_fields[x][y+1]
             left = x > 0 and available_fields[x-1][y]
 
-            node_column.append(Node(available_fields, (up, right, down, left)))
+            node_column.append(Node(available_fields, (up, right, down, left), sim_settings.generic))
         nodes.append(node_column)
 
     return grid, objects, nodes

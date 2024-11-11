@@ -26,4 +26,4 @@ class DisplaySettings:
     GRID_HEIGHT_NEW = 47
     TILE_SIZE_NEW = 7
 
-    
+    MAX_FPS: int = 60

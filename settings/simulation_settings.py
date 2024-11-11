@@ -23,8 +23,8 @@ class GenericSimulationSettings:
     target: Coords = (6, 31)
     source: Coords = (6, 15)
     # TODO find optimal settings
-    node_capacity = 1
-    node_max_smell = 4
+    node_capacity: int = 1
+    node_max_smell: float = 4.0
 
 @dataclass
 class PopulationSettings:

@@ -8,8 +8,6 @@ from simulation.population import Population
 import pygame as pg
 import numpy as np
 
-MAX_FPS = 60
-
 class PygameSimulation:
     class IRenderer:
         def draw(sim: "PygameSimulation"):
@@ -55,7 +53,8 @@ class PygameSimulation:
     def run(self):
         clock = pg.time.Clock()
         while not self.done:
-            clock.tick(MAX_FPS)
+
+            clock.tick(self.display_settings.MAX_FPS)
             self.handle_events()
 
             need_to_step = self.step_by_step and self.step_requested
