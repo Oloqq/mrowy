@@ -1,3 +1,5 @@
+import numpy as np
+
 from simulation.simulation import PygameSimulation
 from constants.enums import FieldType
 import pygame as pg
@@ -20,7 +22,14 @@ class AntRenderer(PygameSimulation.IRenderer):
         if isinstance(sim.selected_tile_type, FieldType):
             sim.grid[x, y] = sim.selected_tile_type
         else:
-            sim.objects[x, y] = sim.selected_tile_type
+            # Initialize sim.objects if it's None
+            if sim.objects is None:
+                sim.objects = np.full(sim.sim_settings.generic.grid_size, None)
+
+            if sim.source is not None and sim.target is not None and sim.nodes[x][y] is not None:
+                sim.objects[x, y] = sim.selected_tile_type
+            else:
+                print("select field on path to place object")
 
         return x, y
 
@@ -66,21 +75,24 @@ class AntRenderer(PygameSimulation.IRenderer):
 
         for x in range(sim.sim_settings.generic.grid_size[0]):
             for y in range(sim.sim_settings.generic.grid_size[1]):
-                intensity = sim.nodes[x][y].mean_intensity(TMP_PHEROMONE_FLAVOR, x, y, sim.nodes)
-                color = (255, 0, 0, int(150 * intensity))
-                tile_size = sim.sim_settings.generic.tile_size
+                # Only draw pheromones if the node exists (i.e., if it's a PATH field)
+                node = sim.nodes[x][y]
+                if node is not None:  # Only process nodes for PATH fields
+                    intensity = node.mean_intensity(TMP_PHEROMONE_FLAVOR, x, y, sim.nodes)
+                    color = (255, 0, 0, int(150 * intensity))
+                    tile_size = sim.sim_settings.generic.tile_size
 
-                pg.draw.rect(
-                    pheromone_surface,
-                    color,
-                    pg.Rect(
-                        x * tile_size,
-                        y * tile_size,
-                        tile_size,
-                        tile_size
-                    ),
-                    0
-                )
+                    pg.draw.rect(
+                        pheromone_surface,
+                        color,
+                        pg.Rect(
+                            x * tile_size,
+                            y * tile_size,
+                            tile_size,
+                            tile_size
+                        ),
+                        0
+                    )
 
         sim.screen.blit(pheromone_surface, (0, 0))
 

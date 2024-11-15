@@ -28,7 +28,9 @@ def create_grid(sim_settings: SimulationSettings):
         grid = np.full(sim_settings.generic.grid_size, FieldType.GRASS, dtype=FieldType)
     return grid
 
-def grid_and_objects(save_name: str, sim_settings: SimulationSettings) -> tuple[np.ndarray, np.ndarray, list[list[Node]]]:
+
+def grid_and_objects(save_name: str, sim_settings: SimulationSettings) -> tuple[
+    np.ndarray, np.ndarray, list[list[Node]]]:
     grid: np.ndarray
     nodes: list[list[Node]] = []
     objects = None
@@ -44,12 +46,12 @@ def grid_and_objects(save_name: str, sim_settings: SimulationSettings) -> tuple[
             objects = loaded_objects
         elif loaded_grid.shape != sim_settings.generic.grid_size:
             raise ValueError(f"Grid size in file does not match simulation settings\n"
-                                f"Grid size in file: {loaded_grid.shape}\n"
-                                f"Expected grid size: {sim_settings.generic.grid_size}")
+                             f"Grid size in file: {loaded_grid.shape}\n"
+                             f"Expected grid size: {sim_settings.generic.grid_size}")
         else:
             raise ValueError(f"Object grid size in file does not match simulation settings\n"
-                                f"Grid size in file: {loaded_objects.shape}\n"
-                                f"Expected grid size: {sim_settings.generic.grid_size}")
+                             f"Grid size in file: {loaded_objects.shape}\n"
+                             f"Expected grid size: {sim_settings.generic.grid_size}")
     else:
         grid = create_grid(sim_settings)
 
@@ -57,19 +59,23 @@ def grid_and_objects(save_name: str, sim_settings: SimulationSettings) -> tuple[
 
     print("available fields: ", available_fields.shape)
     print(available_fields)
-    
+
     for x, column in enumerate(grid):
         node_column = []
         for y, val in enumerate(column):
-            up = y > 0 and available_fields[x][y-1] 
-            right = x < sim_settings.generic.grid_size[0]-1 and available_fields[x+1][y]
-            down = y < sim_settings.generic.grid_size[1]-1 and available_fields[x][y+1]
-            left = x > 0 and available_fields[x-1][y]
+            if val == FieldType.PATH:
+                up = y > 0 and available_fields[x][y - 1]
+                right = x < sim_settings.generic.grid_size[0] - 1 and available_fields[x + 1][y]
+                down = y < sim_settings.generic.grid_size[1] - 1 and available_fields[x][y + 1]
+                left = x > 0 and available_fields[x - 1][y]
 
-            node_column.append(Node(available_fields, (up, right, down, left), sim_settings.generic))
+                node_column.append(Node(available_fields, (up, right, down, left), sim_settings.generic))
+            else:
+                node_column.append(None)
         nodes.append(node_column)
 
     return grid, objects, nodes
+
 
 def window(sim_settings: SimulationSettings):
     window_size = (sim_settings.generic.tile_size * sim_settings.generic.grid_size[0],

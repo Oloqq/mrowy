@@ -63,13 +63,34 @@ class Node:
 
     def mean_intensity(self, flavor: Pheromone, x: int, y: int, nodes: list[list["Node"]]) -> float:
         relevant_smells = []
-        relevant_smells.append(
-            nodes[x][y - 1].pheromones[flavor][Direction.Down.value] if self.has_neighbor[Direction.Up.value] else 0)
-        relevant_smells.append(
-            nodes[x + 1][y].pheromones[flavor][Direction.Left.value] if self.has_neighbor[Direction.Right.value] else 0)
-        relevant_smells.append(
-            nodes[x][y + 1].pheromones[flavor][Direction.Up.value] if self.has_neighbor[Direction.Down.value] else 0)
-        relevant_smells.append(
-            nodes[x - 1][y].pheromones[flavor][Direction.Right.value] if self.has_neighbor[Direction.Left.value] else 0)
+
+        def get_pheromone(x, y, direction):
+            if (x, y) in nodes[x][y].pheromones:
+                return nodes[x][y].pheromones[(x, y)][direction]
+            else:
+                return 0
+
+        if x > 0 and nodes[x - 1][y] is not None and self.has_neighbor[Direction.Up.value]:
+            relevant_smells.append(get_pheromone(x - 1, y, Direction.Down.value))
+        else:
+            relevant_smells.append(0)
+
+        if x < len(nodes) - 1 and nodes[x + 1][y] is not None and self.has_neighbor[Direction.Right.value]:
+            relevant_smells.append(get_pheromone(x + 1, y, Direction.Left.value))
+        else:
+            relevant_smells.append(0)
+
+        if y < len(nodes[0]) - 1 and nodes[x][y + 1] is not None and self.has_neighbor[Direction.Down.value]:
+            relevant_smells.append(get_pheromone(x, y + 1, Direction.Up.value))
+        else:
+            relevant_smells.append(0)
+
+        if y > 0 and nodes[x][y - 1] is not None and self.has_neighbor[Direction.Left.value]:
+            relevant_smells.append(get_pheromone(x, y - 1, Direction.Right.value))
+        else:
+            relevant_smells.append(0)
+
         s = min(np.sum(relevant_smells), self.max_smell)
         return s / self.max_smell
+
+
