@@ -15,5 +15,5 @@ def main(sim_settings):
 
 if __name__ == "__main__":
     sim_settings = get_default_simulation_settings()
-    sim_settings.generic.create_grid_from_img = False
+    sim_settings.generic.create_grid_from_img = True
     main(sim_settings)
