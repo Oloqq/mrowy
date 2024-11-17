@@ -22,8 +22,8 @@ class PygameSimulation:
         self.display_settings: DisplaySettings = display_settings
         old_grid_size = (self.display_settings.GRID_WIDTH_OLD, self.display_settings.GRID_HEIGHT_OLD)
         new_grid_size = (self.display_settings.GRID_WIDTH_NEW, self.display_settings.GRID_HEIGHT_NEW)
-        self.sim_settings.generic.grid_size = new_grid_size if sim_settings.generic.create_grid_from_img else old_grid_size
-        self.sim_settings.generic.tile_size = self.display_settings.TILE_SIZE_NEW if sim_settings.generic.create_grid_from_img else self.display_settings.TILE_SIZE_OLD
+        self.sim_settings.generic.grid_size = old_grid_size if sim_settings.generic.simple_map else new_grid_size
+        self.sim_settings.generic.tile_size = self.display_settings.TILE_SIZE_OLD if sim_settings.generic.simple_map else self.display_settings.TILE_SIZE_NEW
 
         # display
         pg.init()
@@ -113,8 +113,8 @@ class PygameSimulation:
                 elif event.key == pg.K_3:
                     self.selected_tile_type = FieldType.WATER
                     print("Selected water")
-                elif event.key == pg.K_s:
-                    np.savez(self.save_name, grid=self.grid, objects=self.objects)
+                elif event.key == pg.K_9:
+                    np.savez(self.save_name, grid=self.grid, objects=self.objects, nodes=self.nodes)
                     print("Saved grid to file")
                 elif event.key == pg.K_p:
                     self.step_by_step = not self.step_by_step

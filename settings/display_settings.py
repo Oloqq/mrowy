@@ -16,7 +16,7 @@ class DisplaySettings:
     ant_image = pg.image.load("assets/ant.png")
     colony_image = pg.image.load("assets/colony.png")
     food_image = pg.image.load("assets/food.png")
-    # read frid from ant.npz
+    # read from from ant.npz
     GRID_WIDTH_OLD = 30
     GRID_HEIGHT_OLD = 50
     TILE_SIZE_OLD = 20

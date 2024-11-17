@@ -28,38 +28,36 @@ def create_grid(sim_settings: SimulationSettings):
         grid = np.full(sim_settings.generic.grid_size, FieldType.GRASS, dtype=FieldType)
     return grid
 
-
-def grid_and_objects(save_name: str, sim_settings: SimulationSettings) -> tuple[
-    np.ndarray, np.ndarray, list[list[Node]]]:
-    grid: np.ndarray
-    nodes: list[list[Node]] = []
-    objects = None
-
-    if os.path.exists(save_name) and not sim_settings.generic.create_grid_from_img:
+def load_grid_from_file(save_name: str, sim_settings: SimulationSettings):
+    if os.path.exists(save_name):
         loaded_data = np.load(save_name, allow_pickle=True)
         loaded_grid = loaded_data['grid']
         loaded_objects = loaded_data['objects']
-        if (loaded_grid.shape == sim_settings.generic.grid_size and
-                loaded_objects.shape == sim_settings.generic.grid_size):
-            print("Loaded grid from file")
-            grid = loaded_grid
-            objects = loaded_objects
+        loaded_nodes = loaded_data.get("nodes")
+        loaded_nodes = loaded_nodes if loaded_nodes is not None else []
+
+        grid_ok = loaded_grid.shape == sim_settings.generic.grid_size
+        objects_ok = loaded_objects is None or loaded_objects.shape == sim_settings.generic.grid_size
+
+        if grid_ok and objects_ok:
+            return loaded_grid, loaded_objects, loaded_nodes
         elif loaded_grid.shape != sim_settings.generic.grid_size:
             raise ValueError(f"Grid size in file does not match simulation settings\n"
-                             f"Grid size in file: {loaded_grid.shape}\n"
-                             f"Expected grid size: {sim_settings.generic.grid_size}")
+                            f"Grid size in file: {loaded_grid.shape}\n"
+                            f"Expected grid size: {sim_settings.generic.grid_size}")
         else:
             raise ValueError(f"Object grid size in file does not match simulation settings\n"
-                             f"Grid size in file: {loaded_objects.shape}\n"
-                             f"Expected grid size: {sim_settings.generic.grid_size}")
+                            f"Grid size in file: {loaded_objects.shape}\n"
+                            f"Expected grid size: {sim_settings.generic.grid_size}")
     else:
-        grid = create_grid(sim_settings)
+        raise FileNotFoundError(f"save path {save_name} does not exist")
 
+def init_nodes(grid, sim_settings: SimulationSettings):
+    nodes = []
+    print("creating nodes")
     is_tile_traversable = np.isin(grid, [FieldType.PATH])
-
-    print("available fields: ", is_tile_traversable.shape)
-    print(is_tile_traversable)
-
+    # print("available fields: ", is_tile_traversable.shape)
+    # print(is_tile_traversable)
     for x, column in enumerate(grid):
         node_column = []
         for y, val in enumerate(column):
@@ -73,6 +71,24 @@ def grid_and_objects(save_name: str, sim_settings: SimulationSettings) -> tuple[
             else:
                 node_column.append(None)
         nodes.append(node_column)
+    return nodes
+
+
+def grid_and_objects(save_name: str, sim_settings: SimulationSettings) -> tuple[
+    np.ndarray, np.ndarray, list[list[Node]]]:
+    grid: np.ndarray
+    nodes: list[list[Node]] = []
+    objects = None
+
+    if sim_settings.generic.create_grid_from_img:
+        print("processing image")
+        grid = create_grid(sim_settings)
+    else:
+        print("loading file")
+        grid, objects, nodes = load_grid_from_file(save_name, sim_settings)
+
+    if len(nodes) == 0:
+        nodes = init_nodes(grid, sim_settings)
 
     return grid, objects, nodes
 

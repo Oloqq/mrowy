@@ -20,6 +20,7 @@ class GenericSimulationSettings:
     duration: int = 1000
     map_image_path: str = "assets/mapav4.png"
     create_grid_from_img: bool = True
+    simple_map: bool = False
     target: Coords = (6, 31)
     source: Coords = (6, 15)
     # TODO find optimal settings
