@@ -55,21 +55,21 @@ def grid_and_objects(save_name: str, sim_settings: SimulationSettings) -> tuple[
     else:
         grid = create_grid(sim_settings)
 
-    available_fields = np.isin(grid, [FieldType.GRASS, FieldType.FOREST, FieldType.PATH])
+    is_tile_traversable = np.isin(grid, [FieldType.PATH])
 
-    print("available fields: ", available_fields.shape)
-    print(available_fields)
+    print("available fields: ", is_tile_traversable.shape)
+    print(is_tile_traversable)
 
     for x, column in enumerate(grid):
         node_column = []
         for y, val in enumerate(column):
             if val == FieldType.PATH:
-                up = y > 0 and available_fields[x][y - 1]
-                right = x < sim_settings.generic.grid_size[0] - 1 and available_fields[x + 1][y]
-                down = y < sim_settings.generic.grid_size[1] - 1 and available_fields[x][y + 1]
-                left = x > 0 and available_fields[x - 1][y]
+                up = y > 0 and is_tile_traversable[x][y - 1]
+                right = x < sim_settings.generic.grid_size[0] - 1 and is_tile_traversable[x + 1][y]
+                down = y < sim_settings.generic.grid_size[1] - 1 and is_tile_traversable[x][y + 1]
+                left = x > 0 and is_tile_traversable[x - 1][y]
 
-                node_column.append(Node(available_fields, (up, right, down, left), sim_settings.generic))
+                node_column.append(Node(is_tile_traversable, (up, right, down, left), sim_settings.generic))
             else:
                 node_column.append(None)
         nodes.append(node_column)

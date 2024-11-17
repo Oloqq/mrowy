@@ -13,7 +13,7 @@ class PygameSimulation:
         def draw(sim: "PygameSimulation"):
             raise NotImplementedError
 
-        def draw_tile(sim: "PygameSimulation"):
+        def tile_at_mouse_pos(sim: "PygameSimulation"):
             raise NotImplementedError
 
     def __init__(self, save_name: str, renderer: IRenderer, sim_settings: SimulationSettings, display_settings: DisplaySettings):
@@ -78,7 +78,7 @@ class PygameSimulation:
         print("Source set to: ", source)
 
     def isTargetAndSourceSetCheck(self) -> bool:
-        return self.target is not None and self.source is not None     
+        return self.target is not None and self.source is not None
 
     def toggle_pause(self):
         if self.isTargetAndSourceSetCheck():
@@ -124,8 +124,12 @@ class PygameSimulation:
                     self.show_ants = not self.show_ants
         if pg.mouse.get_pressed()[0]:
             if self.paused:
-                # TODO nodes have to be updated as well
-                x, y = self.renderer.draw_tile(self)
+                # TODO nodes have to be updated as well if we paint a path
+                x, y = self.renderer.tile_at_mouse_pos(self)
+                if self.nodes[x][y] == None:
+                    print("Can't place target/source on non-traversable terrain")
+                    return
+
                 if self.selected_tile_type == ObjectType.TARGET:
                     self.set_target((x, y))
                 elif self.selected_tile_type == ObjectType.SOURCE:

@@ -11,7 +11,7 @@ class AntRenderer(PygameSimulation.IRenderer):
         text = font.render("paused" if sim.paused else "running", True, (255, 0, 0))
         sim.screen.blit(text, (10, 10))
 
-    def draw_tile(self, sim: PygameSimulation):
+    def tile_at_mouse_pos(self, sim: PygameSimulation):
         mouse_pos = pg.mouse.get_pos()
         x = mouse_pos[0] // sim.sim_settings.generic.tile_size
         y = mouse_pos[1] // sim.sim_settings.generic.tile_size
