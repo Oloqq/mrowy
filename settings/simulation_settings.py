@@ -37,7 +37,7 @@ class PopulationSettings:
         time_to_spawn: The time remaining until the next spawn.
 
     """
-    spawn_interval: int = 30
+    spawn_interval: int = 150
     time_to_spawn: int = 0
 
 

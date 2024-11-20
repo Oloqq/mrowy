@@ -49,7 +49,7 @@ class Ant:
         current_node: Node = nodes[x][y]
         direction = self.choose_step_direction(current_node, nodes, x, y)
         dx, dy = direction.to_vector()
-        next_node: Node = nodes[x+dx][y+dy]
+        next_node: Node = nodes[x + dx][y + dy]
 
         # ants can occasionally get stuck (for a single step) if they try to explore in an inpassable direction
         # NOTE if a node has no capacity, the ant will just wait, is it ok?
@@ -66,8 +66,21 @@ class Ant:
         tonode.spare_capacity -= 1
 
         delta = self.pheromone_deposited()
-        tonode.pheromones[self.source][direction.opposite().value] += delta
+        self.deposit_pheromone(tonode, self.pos, delta)
         self.decay_pheromones(tonode, delta)
+
+    def deposit_pheromone(self, node: Node, current_pos: tuple[int, int], delta: float = 1.0):
+        x, y = current_pos
+
+        if node is not None and (x, y) in node.pheromones:
+            # Add pheromone in all directions
+            for direction in range(4):  # 4 directions: up, right, down, left
+                current_value = node.pheromones[(x, y)][direction]
+                # Increase pheromone value, but don't exceed max_smell
+                node.pheromones[(x, y)][direction] = min(
+                    current_value + delta,
+                    node.max_smell
+                )
 
     def pheromone_deposited(self) -> float:
         # pheromone amount is represented as tau (τ) in the article

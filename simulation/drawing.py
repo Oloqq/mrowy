@@ -26,7 +26,7 @@ class AntRenderer(PygameSimulation.IRenderer):
             if sim.objects is None:
                 sim.objects = np.full(sim.sim_settings.generic.grid_size, None)
 
-            if sim.source is not None and sim.target is not None and sim.nodes[x][y] is not None:
+            if sim.nodes[x][y] is not None:
                 sim.objects[x, y] = sim.selected_tile_type
             else:
                 print("select field on path to place object")
@@ -43,9 +43,6 @@ class AntRenderer(PygameSimulation.IRenderer):
     def draw_population(self, sim: PygameSimulation):
         population = sim.population
         for ant in population.ants:
-            if ant.source != sim.target and ant.destination != sim.target:
-                continue
-
             ax, ay = ant.pos
             tile = sim.sim_settings.generic.tile_size
             rect_size = tile // 4
@@ -56,17 +53,10 @@ class AntRenderer(PygameSimulation.IRenderer):
                                         (sim.sim_settings.generic.tile_size,
                                          sim.sim_settings.generic.tile_size))
             sim.screen.blit(scaled, (ax * sim.sim_settings.generic.tile_size, ay * sim.sim_settings.generic.tile_size))
-        # for food in population.foods:
-        #     fx, fy = food
-        #     scaled = pg.transform.scale(sim.display_settings.food_image,
-        #     (sim.sim_settings.generic.tile_size,
-        #         sim.sim_settings.generic.tile_size))
-        #     sim.screen.blit(scaled, (fx * sim.sim_settings.generic.tile_size, fy * sim.sim_settings.generic.tile_size))
 
     def draw_pheromones(self, sim: PygameSimulation):
-        TMP_PHEROMONE_FLAVOR = sim.sim_settings.generic.source  # TODO: switch between flavors
-
-        # Create a surface for pheromones with transparency
+        TMP_PHEROMONE_FLAVOR = sim.sim_settings.generic.source
+        # Define the size of the pheromone surface
         pheromone_surface = pg.Surface(
             (sim.sim_settings.generic.grid_size[0] * sim.sim_settings.generic.tile_size,
              sim.sim_settings.generic.grid_size[1] * sim.sim_settings.generic.tile_size),
@@ -75,7 +65,6 @@ class AntRenderer(PygameSimulation.IRenderer):
 
         for x in range(sim.sim_settings.generic.grid_size[0]):
             for y in range(sim.sim_settings.generic.grid_size[1]):
-                # Only draw pheromones if the node exists (i.e., if it's a PATH field)
                 node = sim.nodes[x][y]
                 if node is not None:  # Only process nodes for PATH fields
                     intensity = node.mean_intensity(TMP_PHEROMONE_FLAVOR, x, y, sim.nodes)
@@ -95,6 +84,7 @@ class AntRenderer(PygameSimulation.IRenderer):
                     )
 
         sim.screen.blit(pheromone_surface, (0, 0))
+
 
     def draw_source_and_target(self, sim: PygameSimulation):
         if sim.source is not None:
