@@ -18,14 +18,14 @@ class GenericSimulationSettings:
     time_step: TimeStep = TimeStep.HOURLY
     tile_size: int = 5
     duration: int = 1000
-    map_image_path: str = "assets/mapav4.png"
+    map_image_path: str = "assets/mapav5.png"
     create_grid_from_img: bool = True
     simple_map: bool = False
     target: Coords = (6, 31)
     source: Coords = (6, 15)
     # TODO find optimal settings
     node_capacity: int = 1
-    node_max_smell: float = 4.0
+    node_max_smell: float = 100.0
 
 @dataclass
 class PopulationSettings:
@@ -37,8 +37,12 @@ class PopulationSettings:
         time_to_spawn: The time remaining until the next spawn.
 
     """
-    spawn_interval: int = 150
     time_to_spawn: int = 0
+    # TODO bind to distance
+    spawn_interval: int = 700
+    population_size: int = 100
+    destination_bonus: float = 30.0
+    pheromone_decay: float = 0.5
 
 
 

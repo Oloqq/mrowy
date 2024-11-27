@@ -55,7 +55,7 @@ class AntRenderer(PygameSimulation.IRenderer):
             sim.screen.blit(scaled, (ax * sim.sim_settings.generic.tile_size, ay * sim.sim_settings.generic.tile_size))
 
     def draw_pheromones(self, sim: PygameSimulation):
-        TMP_PHEROMONE_FLAVOR = sim.sim_settings.generic.source
+        TMP_PHEROMONE_FLAVOR = sim.sim_settings.generic.source  # Assuming this flavor is valid
         # Define the size of the pheromone surface
         pheromone_surface = pg.Surface(
             (sim.sim_settings.generic.grid_size[0] * sim.sim_settings.generic.tile_size,
@@ -63,28 +63,26 @@ class AntRenderer(PygameSimulation.IRenderer):
             flags=pg.SRCALPHA
         )
 
+        # Loop over the entire grid and draw pheromones
         for x in range(sim.sim_settings.generic.grid_size[0]):
             for y in range(sim.sim_settings.generic.grid_size[1]):
                 node = sim.nodes[x][y]
-                if node is not None:  # Only process nodes for PATH fields
-                    intensity = node.mean_intensity(TMP_PHEROMONE_FLAVOR, x, y, sim.nodes)
-                    color = (255, 0, 0, int(150 * intensity))
+                if node is not None:  # Only process nodes for valid areas
+                    intensity = node.get_pheromone_intensity()
+                    # Adjust color intensity based on the intensity value
+                    color = (255, 0, 0, int(150 * intensity))  # RGBA, adjust transparency based on intensity
                     tile_size = sim.sim_settings.generic.tile_size
 
+                    # Render pheromone intensity as a tile with varying alpha transparency
                     pg.draw.rect(
                         pheromone_surface,
                         color,
-                        pg.Rect(
-                            x * tile_size,
-                            y * tile_size,
-                            tile_size,
-                            tile_size
-                        ),
-                        0
+                        pg.Rect(x * tile_size, y * tile_size, tile_size, tile_size),
+                        0  # Fill the tile completely
                     )
 
+        # Blit the pheromone surface onto the main screen
         sim.screen.blit(pheromone_surface, (0, 0))
-
 
     def draw_source_and_target(self, sim: PygameSimulation):
         if sim.source is not None:

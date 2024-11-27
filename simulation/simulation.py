@@ -8,6 +8,7 @@ from simulation.population import Population
 import pygame as pg
 import numpy as np
 
+
 class PygameSimulation:
     class IRenderer:
         def draw(sim: "PygameSimulation"):
@@ -16,7 +17,8 @@ class PygameSimulation:
         def tile_at_mouse_pos(sim: "PygameSimulation"):
             raise NotImplementedError
 
-    def __init__(self, save_name: str, renderer: IRenderer, sim_settings: SimulationSettings, display_settings: DisplaySettings):
+    def __init__(self, save_name: str, renderer: IRenderer, sim_settings: SimulationSettings,
+                 display_settings: DisplaySettings):
         self.save_name = save_name
         self.sim_settings: SimulationSettings = sim_settings
         self.display_settings: DisplaySettings = display_settings
@@ -43,7 +45,6 @@ class PygameSimulation:
         self.target: tuple[int, int] = None
         self.source: tuple[int, int] = None
 
-
         # simulation logic
         # self.trips = [ # use for displaying paths
         #     ((0, 2), (0, 10))
@@ -52,6 +53,7 @@ class PygameSimulation:
 
     def run(self):
         clock = pg.time.Clock()
+        not_null_nodes = [node for row in self.nodes for node in row if node is not None]
         while not self.done:
 
             clock.tick(self.display_settings.MAX_FPS)
@@ -64,6 +66,9 @@ class PygameSimulation:
 
             self.screen.fill((255, 255, 255))
             self.renderer.draw(self)
+
+            for node in not_null_nodes:
+                node.decay_pheromones(self.sim_settings.population.pheromone_decay)
 
             pg.display.flip()
 
