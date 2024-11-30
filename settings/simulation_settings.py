@@ -2,6 +2,7 @@ from constants.enums import TimeStep
 from dataclasses import dataclass
 from simulation.ant import Coords
 
+
 @dataclass
 class GenericSimulationSettings:
     """
@@ -17,7 +18,7 @@ class GenericSimulationSettings:
     grid_size: tuple[int, int] = (100, 100)
     time_step: TimeStep = TimeStep.HOURLY
     tile_size: int = 5
-    duration: int = 1000
+    duration: int = 100
     map_image_path: str = "assets/mapav5.png"
     create_grid_from_img: bool = True
     simple_map: bool = False
@@ -26,6 +27,7 @@ class GenericSimulationSettings:
     # TODO find optimal settings
     node_capacity: int = 1
     node_max_smell: float = 100.0
+
 
 @dataclass
 class PopulationSettings:
@@ -38,15 +40,34 @@ class PopulationSettings:
 
     """
     time_to_spawn: int = 0
+    ant_max_memory: int = 3000
+    opulation_size: int = 100
+
     # TODO bind to distance
-    spawn_interval: int = 1000
-    population_size: int = 100
+    # propozycja:
+    # jeśli dystans bezwzględny między polami (oś x + oś y) wynosi 0 < x < 100 to wartości np (do sprawdzenia):
+    # spawn_interval: int = 300
+    # pheromone_decay: float = 1
+    # destination_bonus: float = 20.0
+
+    # 100 < x < 200
+    # spawn_interval: int = 1000
+    # pheromone_decay: float = 0.5
+    # destination_bonus: float = 30.0
+
+    # 200 < x < 300
+    # spawn_interval: int = 2500
+    # pheromone_decay: float = 0.3
+    # destination_bonus: float = 30.0
+
+    # 200 < x < 300
+    # spawn_interval: int = 4000
+    # pheromone_decay: float = 0.3
+    # destination_bonus: float = 30.0
+
     destination_bonus: float = 30.0
-    pheromone_decay: float = 0.5
-    ant_max_memory: int = 1000
-
-
-
+    spawn_interval: int = 4000
+    pheromone_decay: float = 0.3
 
 
 @dataclass
