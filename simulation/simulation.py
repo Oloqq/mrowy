@@ -9,6 +9,34 @@ import pygame as pg
 import numpy as np
 
 
+def set_population_settings_according_to_distance(sim_settings, target, source):
+    #calculate distance dist_x and dist_y between source and target
+    dist_x = abs(target[0] - source[0])
+    dist_y = abs(target[1] - source[1])
+    distance = dist_x + dist_y
+    print("Absolute distance between source and target: ", distance)
+    if 0 < distance < 100:
+        sim_settings.population.spawn_interval = 300
+        sim_settings.population.pheromone_decay = 1
+        sim_settings.population.destination_bonus = 20.0
+    elif 100 < distance < 200:
+        sim_settings.population.spawn_interval = 1000
+        sim_settings.population.pheromone_decay = 0.5
+        sim_settings.population.destination_bonus = 30.0
+    elif 200 < distance < 300:
+        sim_settings.population.spawn_interval = 2500
+        sim_settings.population.pheromone_decay = 0.3
+        sim_settings.population.destination_bonus = 30.0
+    elif 300 < distance:
+        sim_settings.population.spawn_interval = 4000
+        sim_settings.population.pheromone_decay = 0.3
+        sim_settings.population.destination_bonus = 30.0
+    print(f"Population settings adjusted according to distance: "
+          f"{sim_settings.population.spawn_interval}, "
+          f"{sim_settings.population.pheromone_decay}, "
+          f"{sim_settings.population.destination_bonus}")
+
+
 class PygameSimulation:
     class IRenderer:
         def draw(sim: "PygameSimulation"):
@@ -83,7 +111,11 @@ class PygameSimulation:
         print("Source set to: ", source)
 
     def isTargetAndSourceSetCheck(self) -> bool:
-        return self.target is not None and self.source is not None
+        if self.target is not None and self.source is not None:
+            set_population_settings_according_to_distance(self.sim_settings, self.target, self.source)
+            return True
+        else :
+            return False
 
     def toggle_pause(self):
         if self.isTargetAndSourceSetCheck():

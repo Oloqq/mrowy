@@ -41,29 +41,7 @@ class PopulationSettings:
     """
     time_to_spawn: int = 0
     ant_max_memory: int = 3000
-    opulation_size: int = 100
-
-    # TODO bind to distance
-    # propozycja:
-    # jeśli dystans bezwzględny między polami (oś x + oś y) wynosi 0 < x < 100 to wartości np (do sprawdzenia):
-    # spawn_interval: int = 300
-    # pheromone_decay: float = 1
-    # destination_bonus: float = 20.0
-
-    # 100 < x < 200
-    # spawn_interval: int = 1000
-    # pheromone_decay: float = 0.5
-    # destination_bonus: float = 30.0
-
-    # 200 < x < 300
-    # spawn_interval: int = 2500
-    # pheromone_decay: float = 0.3
-    # destination_bonus: float = 30.0
-
-    # 200 < x < 300
-    # spawn_interval: int = 4000
-    # pheromone_decay: float = 0.3
-    # destination_bonus: float = 30.0
+    population_size: int = 100
 
     destination_bonus: float = 30.0
     spawn_interval: int = 4000
