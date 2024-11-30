@@ -21,18 +21,34 @@ class Population:
         self.time_to_spawn -= 1
         if self.time_to_spawn <= 0 or len(self.ants) == 0 or len(self.ants) < 0:
 
+            minimum_shortest_path_to_destination = self.sim_settings.population.ant_max_memory
+            new_ants = []
 
-            self.ants = []
+            if len(self.ants) > 0:
+                for ant in self.ants:
+                    if ant.is_returning and len(ant.visited_fields_copy) < minimum_shortest_path_to_destination:
+                        minimum_shortest_path_to_destination = len(ant.visited_fields_copy)
+
+                for ant in self.ants:
+                    if ant.is_returning and len(ant.visited_fields_copy) < 1.2 * minimum_shortest_path_to_destination:
+                        new_ants.append(ant)
+
+            self.ants = new_ants
+            print(str(len(self.ants))
+                  + " ants had path shorter than 1.25 * minimum_shortest_path_to_destination. Minimum shortest path: "
+                  + str(minimum_shortest_path_to_destination))
 
             self.time_to_spawn = self.spawn_interval
-            print("next generation")
+            print("next generation: adding new ants of number: "
+                  + str(self.sim_settings.population.population_size - len(self.ants)))
 
-            for _ in range(self.sim_settings.population.population_size):
+            for _ in range(self.sim_settings.population.population_size - len(self.ants)):
                 self.ants.append(
                     Ant(
                         position=self.sim_settings.generic.source,
                         destination=self.sim_settings.generic.target,
-                        destination_bonus=self.sim_settings.population.destination_bonus
+                        destination_bonus=self.sim_settings.population.destination_bonus,
+                        max_memory=self.sim_settings.population.ant_max_memory
                     )
                 )
 

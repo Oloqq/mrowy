@@ -39,10 +39,11 @@ class PopulationSettings:
     """
     time_to_spawn: int = 0
     # TODO bind to distance
-    spawn_interval: int = 700
+    spawn_interval: int = 1000
     population_size: int = 100
     destination_bonus: float = 30.0
     pheromone_decay: float = 0.5
+    ant_max_memory: int = 1000
 
 
 

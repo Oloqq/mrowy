@@ -5,7 +5,7 @@ from simulation.node import Node, Coords, Direction
 
 
 class Ant:
-    def __init__(self, position: Coords, destination: Coords, destination_bonus: float):
+    def __init__(self, position: Coords, destination: Coords, destination_bonus: float, max_memory: int = 500):
         self.is_returning = False
         self.source = position
         self.pos = position
@@ -15,7 +15,7 @@ class Ant:
         self.color = (255, 0, 0)
         self.visited_fields = OrderedDict()
         self.visited_fields[position] = None
-        self.max_memory = 500
+        self.max_memory = max_memory
         self.previous_field = None
         self.exploration_chance = 0.2
         self.destination_bonus = destination_bonus
@@ -135,7 +135,7 @@ class Ant:
             deposit_value = delta + (self.bonus if self.is_returning else 0)
             pheromone_values = min(pheromone_values + deposit_value, node.max_smell)
             node.pheromones = pheromone_values
-            print(pheromone_values)
+            # print(pheromone_values)
 
     def pheromone_deposited(self) -> float:
         delta_tau = 5 / np.sqrt(self.age)
