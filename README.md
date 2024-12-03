@@ -40,8 +40,8 @@ Następnie aby uruchomić symulcję należy kliknąć klawisz "space" na klawiat
 Aby wyświetlić widok feromonów należy kliknąć klawisz "f" na klawiaturze. Widok ten pozwala na zobaczenie śladu feromonowego pozostawionego przez mrówki.
 
 ## Mapa kampusu AGH:
-Mapa kampusu AGH została stworzona na podstawie zdjęcia satelitarnego. Na mapie znajdują się budynki, trawniki oraz ścieżki, po których będą przemieszczać się studenci.
+Mapa kampusu AGH została stworzona na podstawie zdjęcia satelitarnego. Na mapie znajdują się budynki, trawniki oraz ścieżki, po których przemieszczają się mrówki
+Docelowa mapa znajduję się w folderze "assets" w pliku "mapav5.png"
 
-Akualnie algorytm, ze względów opymalizacyjnych, działa jedynie na mapach o mniejszych rozmiarach.
-
-Docelowa mapa znajduję się w folderze "assets" w pliku "mapav4.png"
+## Efekt działania algorytmu
+Po każdym cyklu życia mrówek (w zależności od odległości startu i mety, może trwać to do kilku minut) w folderze results zostanie zapisany obrazek z trasą, którą wybrały mrówki.
